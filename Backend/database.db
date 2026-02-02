@@ -1,0 +1,286 @@
+
+DROP DATABASE IF EXISTS ARENACORE;
+CREATE DATABASE ARENACORE;
+USE ARENACORE;
+
+-- =====================================================
+-- 1. USUARIOS Y AUTENTICACIÓN (Login/Registro)
+-- =====================================================
+
+CREATE TABLE usuarios (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    nombre VARCHAR(100),
+    apellido VARCHAR(100),
+    avatar_url VARCHAR(500),
+    pais VARCHAR(100),
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    activo BOOLEAN DEFAULT TRUE
+);
+
+-- =====================================================
+-- 2. PERFIL Y ESTADÍSTICAS DEL JUGADOR
+-- =====================================================
+
+CREATE TABLE estadisticas_jugador (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    usuario_id INT NOT NULL UNIQUE,
+    torneos_jugados INT DEFAULT 0,
+    torneos_ganados INT DEFAULT 0,
+    partidas_jugadas INT DEFAULT 0,
+    partidas_ganadas INT DEFAULT 0,
+    puntos_totales INT DEFAULT 0,
+    nivel INT DEFAULT 1,
+    ranking_global INT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+-- =====================================================
+-- 3. CATEGORÍAS DE JUEGOS
+-- =====================================================
+
+CREATE TABLE categorias (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    icono_url VARCHAR(500),
+    activa BOOLEAN DEFAULT TRUE
+);
+
+-- Categorías por defecto
+INSERT INTO categorias (nombre, descripcion) VALUES
+('FPS', 'Juegos de disparos en primera persona'),
+('MOBA', 'Multiplayer Online Battle Arena'),
+('Battle Royale', 'Juegos de supervivencia multijugador'),
+('Deportes', 'Simuladores deportivos'),
+('Estrategia', 'Juegos de estrategia'),
+('Fighting', 'Juegos de lucha'),
+('Racing', 'Juegos de carreras'),
+('Card Games', 'Juegos de cartas');
+
+-- =====================================================
+-- 4. JUEGOS
+-- =====================================================
+
+CREATE TABLE juegos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(150) NOT NULL,
+    descripcion TEXT,
+    categoria_id INT,
+    imagen_url VARCHAR(500),
+    desarrollador VARCHAR(150),
+    max_jugadores_equipo INT DEFAULT 1,
+    activo BOOLEAN DEFAULT TRUE,
+    destacado BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (categoria_id) REFERENCES categorias(id)
+);
+
+-- Juegos de ejemplo
+INSERT INTO juegos (nombre, descripcion, categoria_id, desarrollador, max_jugadores_equipo, destacado) VALUES
+('League of Legends', 'El MOBA más popular del mundo', 2, 'Riot Games', 5, TRUE),
+('Valorant', 'FPS táctico de Riot Games', 1, 'Riot Games', 5, TRUE),
+('Counter-Strike 2', 'El shooter táctico definitivo', 1, 'Valve', 5, TRUE),
+('Fortnite', 'Battle Royale de Epic Games', 3, 'Epic Games', 4, TRUE),
+('FIFA 24', 'Simulador de fútbol', 4, 'EA Sports', 1, FALSE);
+
+-- =====================================================
+-- 5. MONEDA VIRTUAL
+-- =====================================================
+
+CREATE TABLE moneda_virtual (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(50) NOT NULL,
+    codigo VARCHAR(10) NOT NULL UNIQUE,
+    simbolo VARCHAR(5),
+    tasa_usd DECIMAL(10,4) DEFAULT 1.0000,
+    tasa_eur DECIMAL(10,4) DEFAULT 0.9200,
+    activa BOOLEAN DEFAULT TRUE
+);
+
+-- Moneda por defecto
+INSERT INTO moneda_virtual (nombre, codigo, simbolo) VALUES
+('ArenaCoins', 'AC', '🪙');
+
+-- Billetera del usuario
+CREATE TABLE billetera (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    usuario_id INT NOT NULL UNIQUE,
+    saldo DECIMAL(15,2) DEFAULT 0.00,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+-- =====================================================
+-- 6. SUSCRIPCIONES (Para torneos privados)
+-- =====================================================
+
+CREATE TABLE planes_suscripcion (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(50) NOT NULL,
+    descripcion TEXT,
+    precio_mensual DECIMAL(10,2) NOT NULL,
+    duracion_dias INT NOT NULL,
+    acceso_torneos_privados BOOLEAN DEFAULT FALSE,
+    activo BOOLEAN DEFAULT TRUE
+);
+
+-- Planes por defecto
+INSERT INTO planes_suscripcion (nombre, descripcion, precio_mensual, duracion_dias, acceso_torneos_privados) VALUES
+('Gratuito', 'Plan básico - Solo torneos públicos', 0.00, 0, FALSE),
+('Premium', 'Acceso a torneos privados', 9.99, 30, TRUE),
+('VIP', 'Acceso total + beneficios exclusivos', 19.99, 30, TRUE);
+
+CREATE TABLE suscripciones (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    usuario_id INT NOT NULL,
+    plan_id INT NOT NULL,
+    fecha_inicio DATE NOT NULL,
+    fecha_fin DATE NOT NULL,
+    estado ENUM('activa', 'cancelada', 'expirada') DEFAULT 'activa',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (plan_id) REFERENCES planes_suscripcion(id)
+);
+
+-- =====================================================
+-- 7. SISTEMA DE TORNEOS
+-- =====================================================
+
+CREATE TABLE torneos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(200) NOT NULL,
+    descripcion TEXT,
+    juego_id INT NOT NULL,
+    organizador_id INT NOT NULL,
+    
+    -- Tipo: público (gratis) o privado (requiere suscripción)
+    tipo ENUM('publico', 'privado') DEFAULT 'publico',
+    
+    -- Estado del torneo
+    estado ENUM('abierto', 'en_progreso', 'finalizado', 'cancelado') DEFAULT 'abierto',
+    
+    -- Configuración
+    max_participantes INT NOT NULL,
+    participantes_actuales INT DEFAULT 0,
+    precio_inscripcion DECIMAL(10,2) DEFAULT 0.00,
+    premio_total DECIMAL(15,2) DEFAULT 0.00,
+    
+    -- Fechas
+    fecha_inicio DATETIME NOT NULL,
+    fecha_fin DATETIME,
+    
+    -- Reglas
+    reglas TEXT,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (juego_id) REFERENCES juegos(id),
+    FOREIGN KEY (organizador_id) REFERENCES usuarios(id)
+);
+
+-- Inscripciones a torneos
+CREATE TABLE inscripciones (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    torneo_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    estado ENUM('pendiente', 'confirmada', 'cancelada') DEFAULT 'pendiente',
+    fecha_inscripcion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_inscripcion (torneo_id, usuario_id),
+    FOREIGN KEY (torneo_id) REFERENCES torneos(id) ON DELETE CASCADE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
+
+-- Partidas dentro de torneos
+CREATE TABLE partidas (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    torneo_id INT NOT NULL,
+    ronda INT NOT NULL,
+    jugador1_id INT,
+    jugador2_id INT,
+    ganador_id INT,
+    puntaje_j1 INT,
+    puntaje_j2 INT,
+    estado ENUM('pendiente', 'en_progreso', 'finalizada') DEFAULT 'pendiente',
+    fecha_partida DATETIME,
+    FOREIGN KEY (torneo_id) REFERENCES torneos(id) ON DELETE CASCADE,
+    FOREIGN KEY (jugador1_id) REFERENCES usuarios(id),
+    FOREIGN KEY (jugador2_id) REFERENCES usuarios(id),
+    FOREIGN KEY (ganador_id) REFERENCES usuarios(id)
+);
+
+-- =====================================================
+-- 8. INSIGNIAS (Basadas en victorias)
+-- =====================================================
+
+CREATE TABLE insignias (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    icono_url VARCHAR(500),
+    victorias_requeridas INT DEFAULT 1,
+    puntos_otorgados INT DEFAULT 0,
+    activa BOOLEAN DEFAULT TRUE
+);
+
+-- Insignias por defecto
+INSERT INTO insignias (nombre, descripcion, victorias_requeridas, puntos_otorgados) VALUES
+('Novato', 'Gana tu primer torneo', 1, 100),
+('Competidor', 'Gana 5 torneos', 5, 300),
+('Veterano', 'Gana 10 torneos', 10, 500),
+('Experto', 'Gana 25 torneos', 25, 1000),
+('Maestro', 'Gana 50 torneos', 50, 2500),
+('Leyenda', 'Gana 100 torneos', 100, 5000);
+
+-- Insignias obtenidas por usuarios
+CREATE TABLE usuario_insignias (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    usuario_id INT NOT NULL,
+    insignia_id INT NOT NULL,
+    fecha_obtencion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_user_badge (usuario_id, insignia_id),
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    FOREIGN KEY (insignia_id) REFERENCES insignias(id) ON DELETE CASCADE
+);
+
+-- =====================================================
+-- 9. FAQS (Preguntas Frecuentes)
+-- =====================================================
+
+CREATE TABLE faqs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    pregunta VARCHAR(500) NOT NULL,
+    respuesta TEXT NOT NULL,
+    categoria VARCHAR(100),
+    orden INT DEFAULT 0,
+    activa BOOLEAN DEFAULT TRUE
+);
+
+-- FAQs de ejemplo
+INSERT INTO faqs (pregunta, respuesta, categoria, orden) VALUES
+('¿Cómo me registro?', 'Haz clic en "Registrarse", completa el formulario con tu email y contraseña.', 'Cuenta', 1),
+('¿Cómo me inscribo a un torneo?', 'Ve a Torneos, selecciona uno y haz clic en "Inscribirse".', 'Torneos', 2),
+('¿Qué son las ArenaCoins?', 'Es nuestra moneda virtual, convertible a USD o EUR.', 'Moneda', 3),
+('¿Cuál es la diferencia entre torneos públicos y privados?', 'Los públicos son gratis, los privados requieren suscripción Premium o VIP.', 'Torneos', 4),
+('¿Cómo obtengo insignias?', 'Las insignias se otorgan automáticamente al ganar torneos.', 'Insignias', 5);
+
+-- =====================================================
+-- 10. INFORMACIÓN DE LA APLICACIÓN
+-- =====================================================
+
+CREATE TABLE informacion_app (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    clave VARCHAR(100) NOT NULL UNIQUE,
+    titulo VARCHAR(200),
+    contenido TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Información por defecto
+INSERT INTO informacion_app (clave, titulo, contenido) VALUES
+('about', 'Acerca de ArenaCore', 'ArenaCore es la plataforma líder en torneos de esports. Conectamos jugadores de todo el mundo en competencias justas y emocionantes.'),
+('terms', 'Términos y Condiciones', 'Al usar ArenaCore, aceptas nuestros términos de servicio...'),
+('privacy', 'Política de Privacidad', 'Tu privacidad es importante. Protegemos tus datos...'),
+('contact', 'Contacto', 'Email: soporte@arenacore.com | Discord: discord.gg/arenacore');
