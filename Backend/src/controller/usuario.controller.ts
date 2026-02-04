@@ -1,108 +1,149 @@
 import { Request, Response } from "express";
+import bcrypt from "bcrypt";
 import Usuario from "../model/usuario";
 
-//estos metodos se haran de manera "generica" para reutilizarlos mas adelante
 
-//metodo getAll
 export const findAll = async (req: Request, res: Response) => {
     try {
-        const usuarios = await Usuario.findAll()
-        res.status(200).json(usuarios)
+        const usuarios = await Usuario.findAll({
+            attributes: { exclude: ["password_hash"] }
+        })
+        res.status(200).json(usuarios);
     } catch (error) {
         if (error instanceof Error) {
-            console.error(error.message)
             res.status(400).json({ error: error.message })
         }
     }
 }
 
-//metodo buscar por id
 export const findById = async (req: Request, res: Response) => {
     try {
-        const usuario = await Usuario.findByPk(req.params.id)
-        if (usuario) {
-            res.status(200).json(usuario)
-        } else {
-            res.status(404).json({ message: 'Usuario no encontrado' })
-        }
+        const usuario = await Usuario.findByPk(req.params.id, {
+            attributes: { exclude: ["password_hash"] }
+        })
+
+        if (!usuario) {
+            return res.status(404).json({ message: "Usuario no encontrado" })
+        } 
+
+        res.status(200).json(usuario);
+        
     } catch (error) {
         if (error instanceof Error) {
-            console.error(error.message)
-            res.status(400).json({ error: error.message })
+            res.status(400).json({ error: error.message });
         }
     }
 }
 
-//metodo post
 export const post = async (req: Request, res: Response) => {
     try {
-        //parametros obligatorios
-        const { username, email, password_hash, nombre, apellido, pais } = req.body;
+        const { 
+            username, 
+            email, 
+            password, 
+            nombre, 
+            apellido, 
+            pais } = req.body
+
+        // Validar campos obligatorios
+        if (!username || !email || !password) {
+            return res.status(400).json({
+                message: "Los campos username, email y password son obligatorios"
+            })
+        }
+
+        // Verificar si el username o email ya existen
+        const usuarioExistente = await Usuario.findOne({
+            where: { username }
+        })
+        if (usuarioExistente) {
+            return res.status(409).json({ message: "El username ya está en uso" })
+        }
+
+        const emailExistente = await Usuario.findOne({
+            where: { email }
+        })
+        if (emailExistente) {
+            return res.status(409).json({ message: "El email ya está en uso" })
+        }
+
+        // Hacer hash de la contraseña en el servidor
+        const password_hash = await bcrypt.hash(password, 10)
 
         const usuario = await Usuario.create({
             username,
             email,
-            password_hash,
+            password_hash,  //Se guarda el hash en texto plano
             nombre,
             apellido,
             pais
-        });
+        })
 
-        res.status(201).json(usuario);
+        // Devolver sin el password_hash
+        const { password_hash: _, ...usuarioSinPassword } = usuario.toJSON()
+        res.status(201).json(usuarioSinPassword);
+
     } catch (error) {
         if (error instanceof Error) {
-            res.status(400).json({ error: error.message });
+            res.status(400).json({ error: error.message })
         } else {
-            res.status(500).json({ error: "Error desconocido" });
+            res.status(500).json({ error: "Error desconocido" })
         }
     }
 }
 
-//metodo update
 export const put = async (req: Request, res: Response) => {
     try {
-        const usuario = await Usuario.findByPk(req.params.is)
+        const usuario = await Usuario.findByPk(req.params.id)
 
         if (!usuario) {
-            return res.status(404).json({ message: 'Usuario no encontrado' })
+            return res.status(404).json({ message: "Usuario no encontrado" })
         }
 
-        const { username, email, nombre, apellido, pais } = req.body
+        const { 
+            username, 
+            email, 
+            nombre, 
+            apellido, 
+            pais } = req.body
+
         await usuario.update({
             username,
             email,
             nombre,
             apellido,
-            pais,
+            pais
         })
 
-        res.status(200).json(usuario)
+        // Devolver sin password_hash
+        const { password_hash: _, ...usuarioSinPassword } = usuario.toJSON()
+        res.status(200).json(usuarioSinPassword)
+
     } catch (error) {
         if (error instanceof Error) {
-            res.status(400).json({ error: error.message });
+            res.status(400).json({ error: error.message })
         } else {
-            res.status(500).json({ error: "Error desconocido" });
+            res.status(500).json({ error: "Error desconocido" })
         }
     }
 }
 
-//metodo delete
 export const remove = async (req: Request, res: Response) => {
     try {
         const usuario = await Usuario.findByPk(req.params.id)
 
         if (!usuario) {
-            return res.status(404).json({ message: 'Usuario no encontrado' })
+            return res.status(404).json({ message: "Usuario no encontrado" })
         }
 
         await usuario.destroy()
 
-        res.status(200).json({ message: 'Usuario eliminado exitosamente' })
+        res.status(204).send()
     } catch (error) {
         if (error instanceof Error) {
-            res.status(400).json({ error: error.message });
+            res.status(400).json({ error: error.message })
         } else {
-            res.status(500).json({ error: "Error desconocido" });
+            res.status(500).json({ error: "Error desconocido" })
         }
     }
 }
