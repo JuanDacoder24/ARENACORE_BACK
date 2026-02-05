@@ -15,6 +15,8 @@ interface UsuarioAttributes {
 }
 
 interface UsuarioCreationAttributes extends Optional<UsuarioAttributes, 'id' | 'nombre' | 'apellido' | 'avatar_url' | 'pais' | 'fecha_registro' | 'activo'> {}
+// Define qué campos NO son obligatorios cuando creas un usuario
+
 
 class Usuario extends Model<UsuarioAttributes, UsuarioCreationAttributes> implements UsuarioAttributes {
   public id!: number;

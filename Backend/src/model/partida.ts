@@ -1,113 +1,83 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
 
-interface TorneoAttributes {
+interface PartidaAttributes {
   id: number;
-  nombre: string;
-  descripcion?: string;
-  juego_id: number;
-  organizador_id: number;
-  tipo?: 'publico' | 'privado';
-  estado?: 'abierto' | 'en_progreso' | 'finalizado' | 'cancelado';
-  max_participantes: number;
-  participantes_actuales?: number;
-  precio_inscripcion?: number;
-  premio_total?: number;
-  fecha_inicio: Date;
-  fecha_fin?: Date;
-  reglas?: string;
-  created_at?: Date;
+  torneo_id: number;
+  ronda: number;
+  jugador1_id?: number;
+  jugador2_id?: number;
+  ganador_id?: number;
+  puntaje_j1?: number;
+  puntaje_j2?: number;
+  estado?: 'pendiente' | 'en_progreso' | 'finalizada';
+  fecha_partida?: Date;
 }
 
-interface TorneoCreationAttributes extends Optional<TorneoAttributes, 'id' | 'descripcion' | 'tipo' | 'estado' | 'participantes_actuales' | 'precio_inscripcion' | 'premio_total' | 'fecha_fin' | 'reglas' | 'created_at'> {}
+interface PartidaCreationAttributes extends Optional<PartidaAttributes, 'id' | 'jugador1_id' | 'jugador2_id' | 'ganador_id' | 'puntaje_j1' | 'puntaje_j2' | 'estado' | 'fecha_partida'> {}
 
-class Torneo extends Model<TorneoAttributes, TorneoCreationAttributes> implements TorneoAttributes {
+class Partida extends Model<PartidaAttributes, PartidaCreationAttributes> implements PartidaAttributes {
   public id!: number;
-  public nombre!: string;
-  public descripcion?: string;
-  public juego_id!: number;
-  public organizador_id!: number;
-  public tipo?: 'publico' | 'privado';
-  public estado?: 'abierto' | 'en_progreso' | 'finalizado' | 'cancelado';
-  public max_participantes!: number;
-  public participantes_actuales?: number;
-  public precio_inscripcion?: number;
-  public premio_total?: number;
-  public fecha_inicio!: Date;
-  public fecha_fin?: Date;
-  public reglas?: string;
-  public created_at?: Date;
+  public torneo_id!: number;
+  public ronda!: number;
+  public jugador1_id?: number;
+  public jugador2_id?: number;
+  public ganador_id?: number;
+  public puntaje_j1?: number;
+  public puntaje_j2?: number;
+  public estado?: 'pendiente' | 'en_progreso' | 'finalizada';
+  public fecha_partida?: Date;
 }
 
-Torneo.init(
+Partida.init(
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },
-    nombre: {
-      type: DataTypes.STRING(200),
+    torneo_id: {
+      type: DataTypes.INTEGER,
       allowNull: false
     },
-    descripcion: {
-      type: DataTypes.TEXT,
+    ronda: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    jugador1_id: {
+      type: DataTypes.INTEGER,
       allowNull: true
     },
-    juego_id: {
+    jugador2_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true
     },
-    organizador_id: {
+    ganador_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true
     },
-    tipo: {
-      type: DataTypes.ENUM('publico', 'privado'),
-      defaultValue: 'publico'
+    puntaje_j1: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    puntaje_j2: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     },
     estado: {
-      type: DataTypes.ENUM('abierto', 'en_progreso', 'finalizado', 'cancelado'),
-      defaultValue: 'abierto'
+      type: DataTypes.ENUM('pendiente', 'en_progreso', 'finalizada'),
+      defaultValue: 'pendiente'
     },
-    max_participantes: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    participantes_actuales: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0
-    },
-    precio_inscripcion: {
-      type: DataTypes.DECIMAL(10, 2),
-      defaultValue: 0.00
-    },
-    premio_total: {
-      type: DataTypes.DECIMAL(15, 2),
-      defaultValue: 0.00
-    },
-    fecha_inicio: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    fecha_fin: {
+    fecha_partida: {
       type: DataTypes.DATE,
       allowNull: true
-    },
-    reglas: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW
     }
   },
   {
     sequelize,
-    tableName: 'torneos',
+    tableName: 'partidas',
     timestamps: false
   }
 );
 
-export default Torneo;
+export default Partida;
