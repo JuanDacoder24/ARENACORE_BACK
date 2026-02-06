@@ -1,5 +1,6 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
+import bcrypt from 'bcrypt';
 
 interface UsuarioAttributes {
   id: number;
@@ -15,8 +16,6 @@ interface UsuarioAttributes {
 }
 
 interface UsuarioCreationAttributes extends Optional<UsuarioAttributes, 'id' | 'nombre' | 'apellido' | 'avatar_url' | 'pais' | 'fecha_registro' | 'activo'> {}
-// Define qué campos NO son obligatorios cuando creas un usuario
-
 
 class Usuario extends Model<UsuarioAttributes, UsuarioCreationAttributes> implements UsuarioAttributes {
   public id!: number;
@@ -29,6 +28,42 @@ class Usuario extends Model<UsuarioAttributes, UsuarioCreationAttributes> implem
   public pais?: string;
   public fecha_registro?: Date;
   public activo?: boolean;
+
+  // ============ MÉTODOS DE INSTANCIA ============
+  
+  // Verificar contraseña
+  public async verifyPassword(plainPassword: string): Promise<boolean> {
+    return await bcrypt.compare(plainPassword, this.password_hash);
+  }
+
+  // Ocultar password al convertir a JSON
+  public toJSON() {
+    const values = Object.assign({}, this.get());
+    delete values.password_hash;
+    return values;
+  }
+
+  // ============ MÉTODOS ESTÁTICOS ============
+  
+  // Buscar por email
+  public static async findByEmail(email: string): Promise<Usuario | null> {
+    return await Usuario.findOne({ 
+      where: { 
+        email, 
+        activo: true 
+      } 
+    });
+  }
+
+  // Buscar por username
+  public static async findByUsername(username: string): Promise<Usuario | null> {
+    return await Usuario.findOne({ 
+      where: { 
+        username, 
+        activo: true 
+      } 
+    });
+  }
 }
 
 Usuario.init(
@@ -83,5 +118,21 @@ Usuario.init(
     timestamps: false
   }
 );
+
+// ============ HOOKS ============
+
+// Hash automático antes de crear
+Usuario.beforeCreate(async (usuario: Usuario) => {
+  if (usuario.password_hash) {
+    usuario.password_hash = await bcrypt.hash(usuario.password_hash, 10);
+  }
+});
+
+// Hash automático antes de actualizar
+Usuario.beforeUpdate(async (usuario: Usuario) => {
+  if (usuario.changed('password_hash')) {
+    usuario.password_hash = await bcrypt.hash(usuario.password_hash, 10);
+  }
+});
 
 export default Usuario;
