@@ -15,8 +15,6 @@ interface UsuarioAttributes {
 }
 
 interface UsuarioCreationAttributes extends Optional<UsuarioAttributes, 'id' | 'nombre' | 'apellido' | 'avatar_url' | 'pais' | 'fecha_registro' | 'activo'> {}
-// Define qué campos NO son obligatorios cuando creas un usuario
-
 
 class Usuario extends Model<UsuarioAttributes, UsuarioCreationAttributes> implements UsuarioAttributes {
   public id!: number;
@@ -29,6 +27,8 @@ class Usuario extends Model<UsuarioAttributes, UsuarioCreationAttributes> implem
   public pais?: string;
   public fecha_registro?: Date;
   public activo?: boolean;
+  public readonly createdAt?: Date;
+  public readonly updatedAt?: Date;
 }
 
 Usuario.init(
@@ -46,7 +46,10 @@ Usuario.init(
     email: {
       type: DataTypes.STRING(100),
       allowNull: false,
-      unique: true
+      unique: true,
+      validate: {
+        isEmail: true
+      }
     },
     password_hash: {
       type: DataTypes.STRING(255),
@@ -80,7 +83,7 @@ Usuario.init(
   {
     sequelize,
     tableName: 'usuarios',
-    timestamps: false
+    timestamps: false 
   }
 );
 
