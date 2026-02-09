@@ -28,6 +28,7 @@ class Usuario extends Model<UsuarioAttributes, UsuarioCreationAttributes> implem
   public pais?: string;
   public fecha_registro?: Date;
   public activo?: boolean;
+<<<<<<< HEAD
 
   // ============ MÉTODOS DE INSTANCIA ============
   
@@ -64,6 +65,10 @@ class Usuario extends Model<UsuarioAttributes, UsuarioCreationAttributes> implem
       } 
     });
   }
+=======
+  public readonly createdAt?: Date;
+  public readonly updatedAt?: Date;
+>>>>>>> feature_server_and_router
 }
 
 Usuario.init(
@@ -81,7 +86,10 @@ Usuario.init(
     email: {
       type: DataTypes.STRING(100),
       allowNull: false,
-      unique: true
+      unique: true,
+      validate: {
+        isEmail: true
+      }
     },
     password_hash: {
       type: DataTypes.STRING(255),
@@ -115,7 +123,7 @@ Usuario.init(
   {
     sequelize,
     tableName: 'usuarios',
-    timestamps: false
+    timestamps: false 
   }
 );
 
