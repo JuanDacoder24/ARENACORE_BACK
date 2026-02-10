@@ -1,30 +1,7 @@
-// auth.controller.ts
 import type { Request, Response } from "express";
 import bcrypt from 'bcrypt';
-import jwt, { Secret } from "jsonwebtoken";
 import Usuario from "../model/usuario";
-
-const getJwtConfig = (): { secret: Secret; expiresIn: string } => {
-  const secret = process.env.JWT_SECRET as Secret;
-  const expiresIn = process.env.JWT_EXPIRES_IN || "1d";
-  if (!secret) throw new Error("Falta JWT_SECRET");
-  return { secret, expiresIn };
-};
-
-const generateToken = (userId: number): Promise<string> => {
-  const { secret, expiresIn } = getJwtConfig();
-  return new Promise((resolve, reject) => {
-    jwt.sign(
-      { id: userId },
-      secret,
-      { expiresIn: expiresIn as any },
-      (err, token) => {
-        if (err || !token) return reject(err);
-        resolve(token);
-      }
-    );
-  });
-};
+import { createToken } from "../login/JWTLogin";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -62,7 +39,7 @@ export const register = async (req: Request, res: Response) => {
       password_hash: hashedPassword,
     });
 
-    const token = await generateToken(user.id);
+    const token = createToken(user, false);
 
     return res.status(201).json({
       success: true,
@@ -114,7 +91,7 @@ export const login = async (req: Request, res: Response) => {
       });
     }
 
-    const token = await generateToken(user.id);
+    const token = createToken(user, false);
 
     return res.status(200).json({
       success: true,

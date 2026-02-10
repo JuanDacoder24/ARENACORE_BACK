@@ -28,7 +28,6 @@ class Usuario extends Model<UsuarioAttributes, UsuarioCreationAttributes> implem
   public pais?: string;
   public fecha_registro?: Date;
   public activo?: boolean;
-<<<<<<< HEAD
 
   // ============ MÉTODOS DE INSTANCIA ============
   
@@ -39,8 +38,7 @@ class Usuario extends Model<UsuarioAttributes, UsuarioCreationAttributes> implem
 
   // Ocultar password al convertir a JSON
   public toJSON() {
-    const values = Object.assign({}, this.get());
-    delete values.password_hash;
+    const { password_hash, ...values } = this.get();
     return values;
   }
 
@@ -65,10 +63,6 @@ class Usuario extends Model<UsuarioAttributes, UsuarioCreationAttributes> implem
       } 
     });
   }
-=======
-  public readonly createdAt?: Date;
-  public readonly updatedAt?: Date;
->>>>>>> feature_server_and_router
 }
 
 Usuario.init(

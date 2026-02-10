@@ -10,7 +10,7 @@ export const listByTorneo = async (req: Request, res: Response) => {
   }
 }
 
-export const generateBracket = async (req: Request, res: Response) => {
+export const generateBracket = async (_req: Request, res: Response) => {
   // comprobar que el torneo está cerrado a inscripciones,
   return res.status(501).json({ message: "generar bracket/emparejamientos" })
 }

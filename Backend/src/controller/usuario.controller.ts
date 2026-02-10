@@ -1,32 +1,8 @@
-<<<<<<< HEAD
 import type { Request, Response } from "express";
 import Usuario from "../model/usuario";
-import jwt from "jsonwebtoken";
-
-// ============ FUNCIÓN PARA GENERAR TOKEN ============
-const generateToken = (userId: number, username: string, email: string): string => {
-  const secret = process.env.JWT_SECRET;
-  
-  if (!secret) {
-    throw new Error('JWT_SECRET no está definido en las variables de entorno');
-  }
-  
-  return jwt.sign(
-    { 
-      id: userId,
-      username,
-      email 
-    },
-    secret,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
-  );
-};
+import { createToken } from "../login/JWTLogin";
 
 // ============ CRUD BÁSICO ============
-=======
-import type { Request, Response } from "express"
-import Usuario from "../model/usuario" 
->>>>>>> feature_server_and_router
 
 export const findAll = async (_req: Request, res: Response) => {
   try {
@@ -76,8 +52,7 @@ export const remove = async (req: Request, res: Response) => {
   } catch {
     return res.status(500).json({ message: "Error borrando usuario" })
   }
-<<<<<<< HEAD
-};
+}
 
 // ============ AUTENTICACIÓN ============
 
@@ -114,7 +89,7 @@ export const register = async (req: Request, res: Response) => {
     });
     
     // Generar token
-    const token = generateToken(newUser.id, newUser.username, newUser.email);
+    const token = createToken(newUser, false);
     
     return res.status(201).json({
       success: true,
@@ -173,7 +148,7 @@ export const login = async (req: Request, res: Response) => {
     }
     
     // Generar token
-    const token = generateToken(user.id, user.username, user.email);
+    const token = createToken(user, false);
     
     return res.status(200).json({
       success: true,
@@ -308,6 +283,3 @@ export const changePassword = async (req: Request, res: Response) => {
     });
   }
 };
-=======
-}
->>>>>>> feature_server_and_router

@@ -6,7 +6,7 @@ dotenv.config();
 const sequelize = new Sequelize(
   process.env.DB_NAME || 'ARENACORE',
   process.env.DB_USER || 'root',
-  process.env.DB_PASSWORD || '',
+  process.env.DB_PASSWORD || 'daw12',
   {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '3306'),

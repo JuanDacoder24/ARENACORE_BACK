@@ -1,12 +1,9 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import sequelize from './config/database';
-
-// Importar rutas
-import authRoutes from './routes/auth.routes';
+import authRoutes from './router/auth.routes';
+import mainRouter from './router/index';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -14,7 +11,7 @@ dotenv.config();
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
-// ============ MIDDLEWARES ============
+// MIDDLEWARES
 
 // CORS
 app.use(cors({
@@ -26,28 +23,30 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Logger de peticiones (solo en desarrollo)
+// Manejo de error de JSON inválido
+app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
+  if (err instanceof SyntaxError && 'body' in err) {
+    res.status(400).json({ 
+      success: false,
+      message: 'JSON inválido' 
+    });
+    return;
+  }
+  next();
+});
+
+// Logger de peticiones (en desarrollo)
 if (process.env.NODE_ENV === 'development') {
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    console.log(`${req.method} ${req.path}`);
+  app.use((req: Request, _res: Response, next: NextFunction) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
     next();
   });
 }
 
-// ============ RUTAS ============
-
-// Ruta de prueba
-app.get('/', (req: Request, res: Response) => {
-  res.json({ 
-    success: true,
-    message: 'ArenaCore API funcionando correctamente',
-    version: '1.0.0',
-    timestamp: new Date().toISOString()
-  });
-});
+// RUTAS
 
 // Health check
-app.get('/health', async (req: Request, res: Response) => {
+app.get('/health', async (_req: Request, res: Response) => {
   try {
     await sequelize.authenticate();
     res.json({ 
@@ -66,23 +65,34 @@ app.get('/health', async (req: Request, res: Response) => {
   }
 });
 
+// Ruta raíz
+app.get('/', (_req: Request, res: Response) => {
+  res.json({ 
+    success: true,
+    message: 'ArenaCore API - Backend de Torneos de Videojuegos',
+    version: '1.0.0',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Rutas de la API
 app.use('/api/auth', authRoutes);
+app.use(mainRouter);
 
-// ============ MANEJO DE ERRORES ============
+// MANEJO DE ERRORES
 
 // Ruta no encontrada
-app.use((req: Request, res: Response) => {
+app.use((_req: Request, res: Response) => {
   res.status(404).json({
     success: false,
     message: 'Ruta no encontrada',
-    path: req.path
+    path: _req.path
   });
 });
 
 // Manejador de errores global
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error('Error:', err);
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('[ERROR]', err);
   
   res.status(500).json({
     success: false,
@@ -92,44 +102,29 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-// ============ INICIAR SERVIDOR ============
+// INICIAR SERVIDOR
 
 const startServer = async () => {
   try {
     // Probar conexión a la base de datos
     await sequelize.authenticate();
-    console.log('✅ Conexión a la base de datos exitosa');
+    console.log('Conexión a la base de datos exitosa');
     
     // Sincronizar modelos (solo en desarrollo)
     if (process.env.NODE_ENV === 'development') {
       await sequelize.sync({ alter: true });
-      console.log('✅ Modelos sincronizados con la base de datos');
+      console.log('Modelos sincronizados con la base de datos');
     }
     
     // Iniciar servidor
     app.listen(PORT, () => {
-      console.log('');
-      console.log('🚀 ========================================');
-      console.log(`🚀 ArenaCore Backend iniciado`);
-      console.log(`🚀 Puerto: ${PORT}`);
-      console.log(`🚀 Entorno: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🚀 URL: http://localhost:${PORT}`);
-      console.log('🚀 ========================================');
-      console.log('');
-      console.log('📍 Rutas disponibles:');
-      console.log('   GET  /');
-      console.log('   GET  /health');
-      console.log('   POST /api/auth/register');
-      console.log('   POST /api/auth/login');
-      console.log('   GET  /api/auth/profile');
-      console.log('   PUT  /api/auth/profile');
-      console.log('   PUT  /api/auth/change-password');
-      console.log('   GET  /api/auth/users');
-      console.log('   GET  /api/auth/users/:id');
-      console.log('');
+      console.log('ArenaCore Backend - Servidor iniciado');
+      console.log(`Puerto: ${PORT}`);
+      console.log(`Entorno: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`URL: http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error('❌ Error al iniciar el servidor:', error);
+    console.error('Error al iniciar el servidor:', error);
     process.exit(1);
   }
 };
@@ -137,82 +132,19 @@ const startServer = async () => {
 // Iniciar servidor
 startServer();
 
-// Manejo de señales para cierre graceful
+// Manejo de cierre graceful
 process.on('SIGINT', async () => {
-  console.log('\n⚠️  Cerrando servidor...');
+  console.log('\nCerrando servidor...');
   await sequelize.close();
-  console.log('✅ Conexión a la base de datos cerrada');
+  console.log('Conexión cerrada');
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
-  console.log('\n⚠️  Cerrando servidor...');
+  console.log('\nCerrando servidor...');
   await sequelize.close();
-  console.log('✅ Conexión a la base de datos cerrada');
+  console.log('Conexión cerrada');
   process.exit(0);
 });
 
 export default app;
-=======
-import express, { application } from 'express'
-import { Application, Request, Response } from 'express' 
-import dotenv from 'dotenv'
-import cors from 'cors'
-=======
-import express, { Request, Response, NextFunction, Application } from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import router from './router';
->>>>>>> feature_server_and_router
-
-// Cargar variables de entorno
-dotenv.config();
-
-// Crear aplicación express
-const app: Application = express();
-const PORT = process.env.PORT || 3000;
-
-// Middleware para parsear JSON
-app.use(express.json());
-
-// Manejo de error de JSON inválido
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  if (err instanceof SyntaxError && 'body' in err) {
-    return res.status(400).json({ error: 'JSON inválido' });
-  }
-  next();
-});
-
-// CORS
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  credentials: true
-}));
-
-// Ruta raíz
-app.get('/', (req: Request, res: Response) => {
-  res.json({
-    mensaje: 'API Gestion Torneos',
-    // aquí irán los endpoints
-  });
-});
-
-// Usar el router principal para las rutas de la API
-app.use(router);
-
-// Manejo de rutas no encontradas
-app.use((req: Request, res: Response) => {
-  res.status(404).json({ error: 'Ruta no encontrada' });
-});
-
-<<<<<<< HEAD
-export default app
->>>>>>> feature_server_and_router
-=======
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
-
-export default app;
->>>>>>> feature_server_and_router

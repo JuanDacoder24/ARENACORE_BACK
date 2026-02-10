@@ -52,12 +52,12 @@ export const remove = async (req: Request, res: Response) => {
 }
 
 // Acciones de negocio estado
-export const publicar = async (req: Request, res: Response) => {
+export const publicar = async (_req: Request, res: Response) => {
   // validar que esté en borrador y que tenga fechas ok
   return res.status(501).json({ message: "publicar torneo" })
 }
 
-export const cancelar = async (req: Request, res: Response) => {
+export const cancelar = async (_req: Request, res: Response) => {
   // reglas: solo admin/creador devolver inscritos cerrar partidas
   return res.status(501).json({ message: "cancelar torneo" })
 }
