@@ -1,12 +1,16 @@
-
+-- =====================================================
+-- BASE DE DATOS: ARENACORE (Versión Simplificada)
+-- Sistema de gestión de torneos gaming
+-- =====================================================
+ 
 DROP DATABASE IF EXISTS ARENACORE;
 CREATE DATABASE ARENACORE;
 USE ARENACORE;
-
+ 
 -- =====================================================
 -- 1. USUARIOS Y AUTENTICACIÓN (Login/Registro)
 -- =====================================================
-
+ 
 CREATE TABLE usuarios (
     id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL UNIQUE,
@@ -19,11 +23,11 @@ CREATE TABLE usuarios (
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     activo BOOLEAN DEFAULT TRUE
 );
-
+ 
 -- =====================================================
 -- 2. PERFIL Y ESTADÍSTICAS DEL JUGADOR
 -- =====================================================
-
+ 
 CREATE TABLE estadisticas_jugador (
     id INT PRIMARY KEY AUTO_INCREMENT,
     usuario_id INT NOT NULL UNIQUE,
@@ -37,11 +41,11 @@ CREATE TABLE estadisticas_jugador (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
-
+ 
 -- =====================================================
 -- 3. CATEGORÍAS DE JUEGOS
 -- =====================================================
-
+ 
 CREATE TABLE categorias (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(100) NOT NULL,
@@ -49,7 +53,7 @@ CREATE TABLE categorias (
     icono_url VARCHAR(500),
     activa BOOLEAN DEFAULT TRUE
 );
-
+ 
 -- Categorías por defecto
 INSERT INTO categorias (nombre, descripcion) VALUES
 ('FPS', 'Juegos de disparos en primera persona'),
@@ -60,11 +64,11 @@ INSERT INTO categorias (nombre, descripcion) VALUES
 ('Fighting', 'Juegos de lucha'),
 ('Racing', 'Juegos de carreras'),
 ('Card Games', 'Juegos de cartas');
-
+ 
 -- =====================================================
 -- 4. JUEGOS
 -- =====================================================
-
+ 
 CREATE TABLE juegos (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(150) NOT NULL,
@@ -78,7 +82,7 @@ CREATE TABLE juegos (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (categoria_id) REFERENCES categorias(id)
 );
-
+ 
 -- Juegos de ejemplo
 INSERT INTO juegos (nombre, descripcion, categoria_id, desarrollador, max_jugadores_equipo, destacado) VALUES
 ('League of Legends', 'El MOBA más popular del mundo', 2, 'Riot Games', 5, TRUE),
@@ -86,11 +90,11 @@ INSERT INTO juegos (nombre, descripcion, categoria_id, desarrollador, max_jugado
 ('Counter-Strike 2', 'El shooter táctico definitivo', 1, 'Valve', 5, TRUE),
 ('Fortnite', 'Battle Royale de Epic Games', 3, 'Epic Games', 4, TRUE),
 ('FIFA 24', 'Simulador de fútbol', 4, 'EA Sports', 1, FALSE);
-
+ 
 -- =====================================================
 -- 5. MONEDA VIRTUAL
 -- =====================================================
-
+ 
 CREATE TABLE moneda_virtual (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(50) NOT NULL,
@@ -100,11 +104,11 @@ CREATE TABLE moneda_virtual (
     tasa_eur DECIMAL(10,4) DEFAULT 0.9200,
     activa BOOLEAN DEFAULT TRUE
 );
-
+ 
 -- Moneda por defecto
 INSERT INTO moneda_virtual (nombre, codigo, simbolo) VALUES
 ('ArenaCoins', 'AC', '🪙');
-
+ 
 -- Billetera del usuario
 CREATE TABLE billetera (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -113,74 +117,40 @@ CREATE TABLE billetera (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
-
+ 
 -- =====================================================
 -- 6. SUSCRIPCIONES (Para torneos privados)
 -- =====================================================
-
-CREATE TABLE planes_suscripcion (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nombre VARCHAR(50) NOT NULL,
-    descripcion TEXT,
-    precio_mensual DECIMAL(10,2) NOT NULL,
-    duracion_dias INT NOT NULL,
-    acceso_torneos_privados BOOLEAN DEFAULT FALSE,
-    activo BOOLEAN DEFAULT TRUE
-);
-
--- Planes por defecto
-INSERT INTO planes_suscripcion (nombre, descripcion, precio_mensual, duracion_dias, acceso_torneos_privados) VALUES
-('Gratuito', 'Plan básico - Solo torneos públicos', 0.00, 0, FALSE),
-('Premium', 'Acceso a torneos privados', 9.99, 30, TRUE),
-('VIP', 'Acceso total + beneficios exclusivos', 19.99, 30, TRUE);
-
-CREATE TABLE suscripciones (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    usuario_id INT NOT NULL,
-    plan_id INT NOT NULL,
-    fecha_inicio DATE NOT NULL,
-    fecha_fin DATE NOT NULL,
-    estado ENUM('activa', 'cancelada', 'expirada') DEFAULT 'activa',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    FOREIGN KEY (plan_id) REFERENCES planes_suscripcion(id)
-);
-
+ 
 -- =====================================================
 -- 7. SISTEMA DE TORNEOS
 -- =====================================================
-
+ 
 CREATE TABLE torneos (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(200) NOT NULL,
     descripcion TEXT,
     juego_id INT NOT NULL,
     organizador_id INT NOT NULL,
-    
     -- Tipo: público (gratis) o privado (requiere suscripción)
     tipo ENUM('publico', 'privado') DEFAULT 'publico',
-    
     -- Estado del torneo
     estado ENUM('abierto', 'en_progreso', 'finalizado', 'cancelado') DEFAULT 'abierto',
-    
     -- Configuración
     max_participantes INT NOT NULL,
     participantes_actuales INT DEFAULT 0,
     precio_inscripcion DECIMAL(10,2) DEFAULT 0.00,
     premio_total DECIMAL(15,2) DEFAULT 0.00,
-    
     -- Fechas
     fecha_inicio DATETIME NOT NULL,
     fecha_fin DATETIME,
-    
     -- Reglas
     reglas TEXT,
-    
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (juego_id) REFERENCES juegos(id),
     FOREIGN KEY (organizador_id) REFERENCES usuarios(id)
 );
-
+ 
 -- Inscripciones a torneos
 CREATE TABLE inscripciones (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -192,7 +162,7 @@ CREATE TABLE inscripciones (
     FOREIGN KEY (torneo_id) REFERENCES torneos(id) ON DELETE CASCADE,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
-
+ 
 -- Partidas dentro de torneos
 CREATE TABLE partidas (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -212,75 +182,164 @@ CREATE TABLE partidas (
 );
 
 -- =====================================================
--- 8. INSIGNIAS (Basadas en victorias)
+-- INSERTS PARA BASE DE DATOS ARENACORE
 -- =====================================================
 
-CREATE TABLE insignias (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nombre VARCHAR(100) NOT NULL,
-    descripcion TEXT,
-    icono_url VARCHAR(500),
-    victorias_requeridas INT DEFAULT 1,
-    puntos_otorgados INT DEFAULT 0,
-    activa BOOLEAN DEFAULT TRUE
-);
-
--- Insignias por defecto
-INSERT INTO insignias (nombre, descripcion, victorias_requeridas, puntos_otorgados) VALUES
-('Novato', 'Gana tu primer torneo', 1, 100),
-('Competidor', 'Gana 5 torneos', 5, 300),
-('Veterano', 'Gana 10 torneos', 10, 500),
-('Experto', 'Gana 25 torneos', 25, 1000),
-('Maestro', 'Gana 50 torneos', 50, 2500),
-('Leyenda', 'Gana 100 torneos', 100, 5000);
-
--- Insignias obtenidas por usuarios
-CREATE TABLE usuario_insignias (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    usuario_id INT NOT NULL,
-    insignia_id INT NOT NULL,
-    fecha_obtencion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_user_badge (usuario_id, insignia_id),
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    FOREIGN KEY (insignia_id) REFERENCES insignias(id) ON DELETE CASCADE
-);
+USE ARENACORE;
 
 -- =====================================================
--- 9. FAQS (Preguntas Frecuentes)
+-- 1. USUARIOS
 -- =====================================================
-
-CREATE TABLE faqs (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    pregunta VARCHAR(500) NOT NULL,
-    respuesta TEXT NOT NULL,
-    categoria VARCHAR(100),
-    orden INT DEFAULT 0,
-    activa BOOLEAN DEFAULT TRUE
-);
-
--- FAQs de ejemplo
-INSERT INTO faqs (pregunta, respuesta, categoria, orden) VALUES
-('¿Cómo me registro?', 'Haz clic en "Registrarse", completa el formulario con tu email y contraseña.', 'Cuenta', 1),
-('¿Cómo me inscribo a un torneo?', 'Ve a Torneos, selecciona uno y haz clic en "Inscribirse".', 'Torneos', 2),
-('¿Qué son las ArenaCoins?', 'Es nuestra moneda virtual, convertible a USD o EUR.', 'Moneda', 3),
-('¿Cuál es la diferencia entre torneos públicos y privados?', 'Los públicos son gratis, los privados requieren suscripción Premium o VIP.', 'Torneos', 4),
-('¿Cómo obtengo insignias?', 'Las insignias se otorgan automáticamente al ganar torneos.', 'Insignias', 5);
+-- Contraseñas hasheadas (bcrypt) - Password: "password123" para todos
+INSERT INTO usuarios (username, email, password_hash, nombre, apellido, avatar_url, pais, activo) VALUES
+('ProGamer01', 'progamer01@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Carlos', 'Rodríguez', 'https://i.pravatar.cc/150?img=1', 'España', TRUE),
+('ShadowNinja', 'shadowninja@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'María', 'García', 'https://i.pravatar.cc/150?img=2', 'México', TRUE),
+('ThunderStrike', 'thunder@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Luis', 'Martínez', 'https://i.pravatar.cc/150?img=3', 'Argentina', TRUE),
+('DragonSlayer', 'dragon@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Ana', 'López', 'https://i.pravatar.cc/150?img=4', 'Colombia', TRUE),
+('PhoenixRise', 'phoenix@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Jorge', 'Hernández', 'https://i.pravatar.cc/150?img=5', 'Chile', TRUE),
+('StormBreaker', 'storm@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Laura', 'Pérez', 'https://i.pravatar.cc/150?img=6', 'España', TRUE),
+('IceQueen', 'icequeen@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Sofía', 'González', 'https://i.pravatar.cc/150?img=7', 'Perú', TRUE),
+('FireFox99', 'firefox@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Miguel', 'Sánchez', 'https://i.pravatar.cc/150?img=8', 'Uruguay', TRUE),
+('NightHawk', 'nighthawk@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Carmen', 'Ramírez', 'https://i.pravatar.cc/150?img=9', 'Venezuela', TRUE),
+('SilverBullet', 'silver@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Pedro', 'Torres', 'https://i.pravatar.cc/150?img=10', 'Ecuador', TRUE),
+('GoldenEagle', 'golden@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Isabel', 'Flores', 'https://i.pravatar.cc/150?img=11', 'Bolivia', TRUE),
+('CrimsonWolf', 'crimson@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Roberto', 'Castro', 'https://i.pravatar.cc/150?img=12', 'Paraguay', TRUE),
+('VenomStrike', 'venom@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Elena', 'Morales', 'https://i.pravatar.cc/150?img=13', 'España', TRUE),
+('BladeRunner', 'blade@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Javier', 'Ruiz', 'https://i.pravatar.cc/150?img=14', 'México', TRUE),
+('StarGazer', 'stargazer@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Valentina', 'Ortiz', 'https://i.pravatar.cc/150?img=15', 'Argentina', TRUE);
 
 -- =====================================================
--- 10. INFORMACIÓN DE LA APLICACIÓN
+-- 2. ESTADÍSTICAS DE JUGADORES
 -- =====================================================
+INSERT INTO estadisticas_jugador (usuario_id, torneos_jugados, torneos_ganados, partidas_jugadas, partidas_ganadas, puntos_totales, nivel, ranking_global) VALUES
+(1, 25, 8, 120, 75, 15000, 15, 1),
+(2, 22, 6, 105, 68, 13500, 14, 2),
+(3, 28, 10, 140, 92, 18000, 18, 3),
+(4, 18, 4, 85, 52, 10500, 12, 4),
+(5, 30, 12, 150, 98, 20000, 20, 5),
+(6, 15, 3, 70, 45, 9000, 11, 6),
+(7, 20, 5, 95, 60, 12000, 13, 7),
+(8, 12, 2, 60, 38, 7500, 10, 8),
+(9, 17, 4, 80, 50, 10000, 12, 9),
+(10, 14, 3, 65, 40, 8000, 10, 10),
+(11, 10, 1, 50, 28, 6000, 9, 11),
+(12, 8, 1, 40, 22, 5000, 8, 12),
+(13, 16, 3, 75, 48, 9500, 11, 13),
+(14, 19, 5, 90, 58, 11500, 13, 14),
+(15, 13, 2, 62, 39, 7800, 10, 15);
 
-CREATE TABLE informacion_app (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    clave VARCHAR(100) NOT NULL UNIQUE,
-    titulo VARCHAR(200),
-    contenido TEXT,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+-- =====================================================
+-- 3. BILLETERAS
+-- =====================================================
+INSERT INTO billetera (usuario_id, saldo) VALUES
+(1, 5000.00),
+(2, 4500.00),
+(3, 6000.00),
+(4, 3500.00),
+(5, 7500.00),
+(6, 3000.00),
+(7, 4000.00),
+(8, 2500.00),
+(9, 3800.00),
+(10, 3200.00),
+(11, 2800.00),
+(12, 2200.00),
+(13, 3600.00),
+(14, 4200.00),
+(15, 3100.00);
 
--- Información por defecto
-INSERT INTO informacion_app (clave, titulo, contenido) VALUES
-('about', 'Acerca de ArenaCore', 'ArenaCore es la plataforma líder en torneos de esports. Conectamos jugadores de todo el mundo en competencias justas y emocionantes.'),
-('terms', 'Términos y Condiciones', 'Al usar ArenaCore, aceptas nuestros términos de servicio...'),
-('privacy', 'Política de Privacidad', 'Tu privacidad es importante. Protegemos tus datos...'),
-('contact', 'Contacto', 'Email: soporte@arenacore.com | Discord: discord.gg/arenacore');
+-- =====================================================
+-- 4. TORNEOS
+-- =====================================================
+INSERT INTO torneos (nombre, descripcion, juego_id, organizador_id, tipo, estado, max_participantes, participantes_actuales, precio_inscripcion, premio_total, fecha_inicio, reglas) VALUES
+-- Torneos Abiertos (En inscripción)
+('Copa League of Legends 2025', 'Torneo profesional de LoL con premios increíbles', 1, 1, 'publico', 'abierto', 32, 18, 50.00, 5000.00, '2025-03-15 18:00:00', 'Prohibido uso de hacks. Fair play obligatorio.'),
+('Valorant Masters Spring', 'Competencia táctica de alto nivel', 2, 2, 'publico', 'abierto', 16, 12, 75.00, 8000.00, '2025-03-20 19:00:00', 'Equipos de 5 jugadores. Comunicación obligatoria.'),
+('CS2 Global Championship', 'El mejor torneo de Counter-Strike', 3, 3, 'privado', 'abierto', 24, 8, 100.00, 12000.00, '2025-03-25 20:00:00', 'Sin cheats. Grabación de partidas requerida.'),
+
+-- Torneos En Progreso
+('Fortnite Battle Royale Pro', 'Supervivencia extrema', 4, 4, 'publico', 'en_progreso', 100, 100, 25.00, 3000.00, '2025-02-08 17:00:00', 'Solo modo arena. Sin teamers.'),
+('FIFA 24 Weekend League', 'Torneo de fin de semana', 5, 5, 'publico', 'en_progreso', 64, 64, 30.00, 2500.00, '2025-02-09 14:00:00', 'Ultimate Team permitido. Sin pause abuse.'),
+
+-- Torneos Finalizados
+('League Legends Winter Cup', 'Copa de invierno completada', 1, 1, 'publico', 'finalizado', 32, 32, 40.00, 4000.00, '2025-01-15 18:00:00', 'Torneo completado exitosamente'),
+('Valorant Invitational', 'Torneo por invitación', 2, 2, 'privado', 'finalizado', 8, 8, 150.00, 10000.00, '2025-01-20 20:00:00', 'Solo jugadores invitados'),
+
+-- Torneos Gratuitos
+('Free League Tournament', 'Torneo gratuito para principiantes', 1, 3, 'publico', 'abierto', 64, 35, 0.00, 1000.00, '2025-03-18 16:00:00', 'Abierto a todos. Premio simbólico.'),
+('Valorant Newbie Cup', 'Copa para nuevos jugadores', 2, 4, 'publico', 'abierto', 32, 20, 0.00, 500.00, '2025-03-22 17:00:00', 'Nivel máximo permitido: 10');
+
+-- =====================================================
+-- 5. INSCRIPCIONES A TORNEOS (CORREGIDO)
+-- =====================================================
+INSERT INTO inscripciones (torneo_id, usuario_id, estado) VALUES
+-- Torneo 1: Copa LoL (18 participantes)
+(1, 1, 'confirmada'), (1, 2, 'confirmada'), (1, 3, 'confirmada'), (1, 4, 'confirmada'),
+(1, 5, 'confirmada'), (1, 6, 'confirmada'), (1, 7, 'confirmada'), (1, 8, 'confirmada'),
+(1, 9, 'confirmada'), (1, 10, 'confirmada'), (1, 11, 'pendiente'), (1, 12, 'pendiente'),
+(1, 13, 'confirmada'), (1, 14, 'confirmada'), (1, 15, 'confirmada'), (1, 1, 'confirmada'),
+(1, 2, 'confirmada'), (1, 3, 'confirmada'),
+
+-- Torneo 2: Valorant Masters (12 participantes)
+(2, 1, 'confirmada'), (2, 3, 'confirmada'), (2, 5, 'confirmada'), (2, 7, 'confirmada'),
+(2, 9, 'confirmada'), (2, 11, 'confirmada'), (2, 13, 'confirmada'), (2, 15, 'confirmada'),
+(2, 2, 'pendiente'), (2, 4, 'pendiente'), (2, 6, 'confirmada'), (2, 8, 'confirmada'),
+
+-- Torneo 3: CS2 Championship (8 participantes)
+(3, 1, 'confirmada'), (3, 3, 'confirmada'), (3, 5, 'confirmada'), (3, 7, 'confirmada'),
+(3, 9, 'confirmada'), (3, 11, 'confirmada'), (3, 13, 'pendiente'), (3, 15, 'pendiente'),
+
+-- Torneo 4: Fortnite (en progreso - 10 participantes mostrados)
+(4, 1, 'confirmada'), (4, 2, 'confirmada'), (4, 3, 'confirmada'), (4, 4, 'confirmada'),
+(4, 5, 'confirmada'), (4, 6, 'confirmada'), (4, 7, 'confirmada'), (4, 8, 'confirmada'),
+(4, 9, 'confirmada'), (4, 10, 'confirmada'),
+
+-- Torneo 5: FIFA Weekend League (10 participantes)
+(5, 1, 'confirmada'), (5, 2, 'confirmada'), (5, 3, 'confirmada'), (5, 4, 'confirmada'),
+(5, 5, 'confirmada'), (5, 9, 'confirmada'), (5, 10, 'confirmada'), (5, 11, 'confirmada'),
+(5, 12, 'confirmada'), (5, 13, 'confirmada'),
+
+-- Torneo 8: Free League (35 participantes)
+(8, 1, 'confirmada'), (8, 2, 'confirmada'), (8, 3, 'confirmada'), (8, 4, 'confirmada'),
+(8, 5, 'confirmada'), (8, 6, 'confirmada'), (8, 7, 'confirmada'), (8, 8, 'confirmada'),
+(8, 9, 'confirmada'), (8, 10, 'confirmada'), (8, 11, 'confirmada'), (8, 12, 'confirmada'),
+(8, 13, 'confirmada'), (8, 14, 'confirmada'), (8, 15, 'confirmada');
+
+-- =====================================================
+-- 6. PARTIDAS
+-- =====================================================
+INSERT INTO partidas (torneo_id, ronda, jugador1_id, jugador2_id, ganador_id, puntaje_j1, puntaje_j2, estado, fecha_partida) VALUES
+-- Torneo 6 (Finalizado) - Ronda 1
+(6, 1, 1, 2, 1, 16, 12, 'finalizada', '2025-01-15 18:30:00'),
+(6, 1, 3, 4, 3, 18, 10, 'finalizada', '2025-01-15 18:35:00'),
+(6, 1, 5, 6, 5, 20, 8, 'finalizada', '2025-01-15 18:40:00'),
+(6, 1, 7, 8, 7, 15, 13, 'finalizada', '2025-01-15 18:45:00'),
+
+-- Torneo 6 - Semifinales
+(6, 2, 1, 3, 3, 14, 16, 'finalizada', '2025-01-15 20:00:00'),
+(6, 2, 5, 7, 5, 18, 14, 'finalizada', '2025-01-15 20:05:00'),
+
+-- Torneo 6 - Final
+(6, 3, 3, 5, 5, 15, 18, 'finalizada', '2025-01-15 21:30:00'),
+
+-- Torneo 4 (En progreso) - Algunas partidas
+(4, 1, 1, 2, 1, 25, 18, 'finalizada', '2025-02-08 17:30:00'),
+(4, 1, 3, 4, 3, 30, 15, 'finalizada', '2025-02-08 17:35:00'),
+(4, 1, 5, 6, NULL, NULL, NULL, 'en_progreso', '2025-02-10 18:00:00'),
+(4, 1, 7, 8, NULL, NULL, NULL, 'pendiente', '2025-02-10 19:00:00'),
+
+-- Torneo 5 (FIFA - En progreso)
+(5, 1, 1, 9, 1, 3, 1, 'finalizada', '2025-02-09 14:30:00'),
+(5, 1, 2, 10, 2, 4, 2, 'finalizada', '2025-02-09 14:45:00'),
+(5, 1, 3, 11, NULL, NULL, NULL, 'en_progreso', '2025-02-10 15:00:00'),
+(5, 1, 4, 12, NULL, NULL, NULL, 'pendiente', '2025-02-10 16:00:00');
+
+-- =====================================================
+-- VERIFICACIÓN DE DATOS
+-- =====================================================
+SELECT 'Usuarios insertados:' AS Info, COUNT(*) AS Total FROM usuarios;
+SELECT 'Estadísticas creadas:' AS Info, COUNT(*) AS Total FROM estadisticas_jugador;
+SELECT 'Billeteras creadas:' AS Info, COUNT(*) AS Total FROM billetera;
+SELECT 'Torneos creados:' AS Info, COUNT(*) AS Total FROM torneos;
+SELECT 'Inscripciones realizadas:' AS Info, COUNT(*) AS Total FROM inscripciones;
+SELECT 'Partidas registradas:' AS Info, COUNT(*) AS Total FROM partidas;
