@@ -125,31 +125,34 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
-    
-    // Buscar usuario por email
-    const user = await Usuario.findByEmail(email);
-    
+    // Permitir login con username o email
+    const { usernameOrEmail, password } = req.body;
+
+    // Buscar usuario por email o username
+    let user = await Usuario.findByEmail(usernameOrEmail);
+    if (!user) {
+      user = await Usuario.findByUsername(usernameOrEmail);
+    }
+
     if (!user) {
       return res.status(401).json({
         success: false,
         message: "Credenciales inválidas"
       });
     }
-    
+
     // Verificar contraseña
     const isValidPassword = await user.verifyPassword(password);
-    
     if (!isValidPassword) {
       return res.status(401).json({
         success: false,
         message: "Credenciales inválidas"
       });
     }
-    
+
     // Generar token
     const token = createToken(user, false);
-    
+
     return res.status(200).json({
       success: true,
       message: "Login exitoso",
@@ -166,7 +169,7 @@ export const login = async (req: Request, res: Response) => {
         }
       }
     });
-    
+
   } catch (error) {
     console.error("Error en login:", error);
     return res.status(500).json({
