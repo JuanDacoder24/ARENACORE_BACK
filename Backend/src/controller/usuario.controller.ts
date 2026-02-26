@@ -125,7 +125,7 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    // Permitir login con username o email
+    console.log('BODY RECIBIDO:', req.body);  // <-- añade esto
     const { usernameOrEmail, password } = req.body;
 
     // Buscar usuario por email o username

@@ -123,18 +123,12 @@ Usuario.init(
 
 // ============ HOOKS ============
 
-// Hash automático antes de crear
-Usuario.beforeCreate(async (usuario: Usuario) => {
-  if (usuario.password_hash) {
-    usuario.password_hash = await bcrypt.hash(usuario.password_hash, 10);
-  }
-});
 
-// Hash automático antes de actualizar
-Usuario.beforeUpdate(async (usuario: Usuario) => {
-  if (usuario.changed('password_hash')) {
-    usuario.password_hash = await bcrypt.hash(usuario.password_hash, 10);
-  }
-});
+// Hash automático antes de crear
+// Usuario.beforeCreate(async (usuario: Usuario) => {
+//   if (usuario.password_hash) {
+//     usuario.password_hash = await bcrypt.hash(usuario.password_hash, 10);
+//   }
+// });
 
 export default Usuario;

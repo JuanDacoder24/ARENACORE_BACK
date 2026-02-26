@@ -20,7 +20,7 @@ const validate = (req: any, res: any, next: any) => {
 // Validaciones
 const registerValidation = [
   body('username').trim().notEmpty().withMessage('El username es requerido'),
-  body('email').isEmail().withMessage('Email inválido').normalizeEmail(),
+body('email').isEmail().withMessage('Email inválido'),
   body('password')
     .isLength({ min: 8 }).withMessage('Mínimo 8 caracteres')
     .matches(/[A-Z]/).withMessage('Debe tener una mayúscula')
@@ -29,7 +29,7 @@ const registerValidation = [
 ];
 
 const loginValidation = [
-  body('email').isEmail().withMessage('Email inválido').normalizeEmail(),
+  body('usernameOrEmail').notEmpty().withMessage('Email o usuario requerido'),
   body('password').notEmpty().withMessage('Contraseña requerida'),
   validate
 ];
