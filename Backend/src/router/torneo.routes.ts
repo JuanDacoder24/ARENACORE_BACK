@@ -12,5 +12,6 @@ router.delete('/torneos/:id', TorneosController.remove)
 // Acciones extra
 router.post('/torneos/:id/publicar', TorneosController.publicar)
 router.post('/torneos/:id/cancelar', TorneosController.cancelar)
+router.post('/torneos/:id/inscribir', TorneosController.inscribir)
 
 export default router

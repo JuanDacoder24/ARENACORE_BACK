@@ -1,5 +1,6 @@
 import type { Request, Response } from "express"
 import Torneo from "../model/torneo"
+import Inscripcion from "../model/inscripcion"
 
 export const findAll = async (_req: Request, res: Response) => {
   try {
@@ -51,13 +52,42 @@ export const remove = async (req: Request, res: Response) => {
   }
 }
 
-// Acciones de negocio estado
 export const publicar = async (_req: Request, res: Response) => {
-  // validar que esté en borrador y que tenga fechas ok
   return res.status(501).json({ message: "publicar torneo" })
 }
 
 export const cancelar = async (_req: Request, res: Response) => {
-  // reglas: solo admin/creador devolver inscritos cerrar partidas
   return res.status(501).json({ message: "cancelar torneo" })
+}
+
+export const inscribir = async (req: Request, res: Response) => {
+  try {
+    const torneo_id = parseInt(req.params.id)
+    const { usuario_id } = req.body
+
+    const torneo = await Torneo.findByPk(torneo_id)
+    if (!torneo) return res.status(404).json({ message: "Torneo no encontrado" })
+
+    if (torneo.estado !== 'abierto') {
+      return res.status(400).json({ message: "El torneo no está abierto para inscripciones" })
+    }
+
+    const participantes = torneo.participantes_actuales ?? 0
+
+    if (participantes >= torneo.max_participantes) {
+      return res.status(400).json({ message: "El torneo está lleno" })
+    }
+
+    await Inscripcion.create({ torneo_id, usuario_id })
+
+    await torneo.update({ participantes_actuales: participantes + 1 })
+
+    return res.status(201).json({ message: "Inscripción exitosa" })
+
+  } catch (error: any) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({ message: "Ya estás inscrito en este torneo" })
+    }
+    return res.status(500).json({ message: "Error al inscribirse" })
+  }
 }
