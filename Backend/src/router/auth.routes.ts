@@ -29,7 +29,7 @@ body('email').isEmail().withMessage('Email inválido'),
 ];
 
 const loginValidation = [
-  body('usernameOrEmail').notEmpty().withMessage('Email o usuario requerido'),
+  body('email').notEmpty().withMessage('Email requerido'),
   body('password').notEmpty().withMessage('Contraseña requerida'),
   validate
 ];

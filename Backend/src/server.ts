@@ -77,7 +77,8 @@ app.get('/', (_req: Request, res: Response) => {
 
 // Rutas de la API
 app.use('/api/auth', authRoutes);
-app.use(mainRouter);
+app.use('/api', mainRouter); // Todas las rutas de la API estarán bajo /api
+// app.use(mainRouter);
 
 // MANEJO DE ERRORES
 

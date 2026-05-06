@@ -54,7 +54,6 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
       return;
     }
     
-    // Adjuntar usuario a la request (sin password_hash)
     req.user = {
       id: user.id,
       username: user.username,

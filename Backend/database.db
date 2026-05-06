@@ -54,16 +54,6 @@ CREATE TABLE categorias (
     activa BOOLEAN DEFAULT TRUE
 );
  
--- Categorías por defecto
-INSERT INTO categorias (nombre, descripcion) VALUES
-('FPS', 'Juegos de disparos en primera persona'),
-('MOBA', 'Multiplayer Online Battle Arena'),
-('Battle Royale', 'Juegos de supervivencia multijugador'),
-('Deportes', 'Simuladores deportivos'),
-('Estrategia', 'Juegos de estrategia'),
-('Fighting', 'Juegos de lucha'),
-('Racing', 'Juegos de carreras'),
-('Card Games', 'Juegos de cartas');
  
 -- =====================================================
 -- 4. JUEGOS
@@ -82,19 +72,8 @@ CREATE TABLE juegos (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (categoria_id) REFERENCES categorias(id)
 );
- 
--- Juegos de ejemplo
-INSERT INTO juegos (nombre, descripcion, categoria_id, desarrollador, max_jugadores_equipo, destacado) VALUES
-('League of Legends', 'El MOBA más popular del mundo', 2, 'Riot Games', 5, TRUE),
-('Valorant', 'FPS táctico de Riot Games', 1, 'Riot Games', 5, TRUE),
-('Counter-Strike 2', 'El shooter táctico definitivo', 1, 'Valve', 5, TRUE),
-('Fortnite', 'Battle Royale de Epic Games', 3, 'Epic Games', 4, TRUE),
-('FIFA 24', 'Simulador de fútbol', 4, 'EA Sports', 1, FALSE);
- 
--- =====================================================
--- 5. MONEDA VIRTUAL
--- =====================================================
- 
+
+
 CREATE TABLE moneda_virtual (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(50) NOT NULL,
@@ -109,6 +88,7 @@ CREATE TABLE moneda_virtual (
 INSERT INTO moneda_virtual (nombre, codigo, simbolo) VALUES
 ('ArenaCoins', 'AC', '🪙');
  
+ 
 -- Billetera del usuario
 CREATE TABLE billetera (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -118,13 +98,6 @@ CREATE TABLE billetera (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
  
--- =====================================================
--- 6. SUSCRIPCIONES (Para torneos privados)
--- =====================================================
- 
--- =====================================================
--- 7. SISTEMA DE TORNEOS
--- =====================================================
  
 CREATE TABLE torneos (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -181,165 +154,297 @@ CREATE TABLE partidas (
     FOREIGN KEY (ganador_id) REFERENCES usuarios(id)
 );
 
--- =====================================================
--- INSERTS PARA BASE DE DATOS ARENACORE
--- =====================================================
-
-USE ARENACORE;
 
 -- =====================================================
--- 1. USUARIOS
+-- 1. INSERCIÓN DE USUARIOS (Jugadores de Steam)
 -- =====================================================
--- Contraseñas hasheadas (bcrypt) - Password: "password123" para todos
+
 INSERT INTO usuarios (username, email, password_hash, nombre, apellido, avatar_url, pais, activo) VALUES
-('ProGamer01', 'progamer01@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Carlos', 'Rodríguez', 'https://i.pravatar.cc/150?img=1', 'España', TRUE),
-('ShadowNinja', 'shadowninja@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'María', 'García', 'https://i.pravatar.cc/150?img=2', 'México', TRUE),
-('ThunderStrike', 'thunder@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Luis', 'Martínez', 'https://i.pravatar.cc/150?img=3', 'Argentina', TRUE),
-('DragonSlayer', 'dragon@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Ana', 'López', 'https://i.pravatar.cc/150?img=4', 'Colombia', TRUE),
-('PhoenixRise', 'phoenix@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Jorge', 'Hernández', 'https://i.pravatar.cc/150?img=5', 'Chile', TRUE),
-('StormBreaker', 'storm@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Laura', 'Pérez', 'https://i.pravatar.cc/150?img=6', 'España', TRUE),
-('IceQueen', 'icequeen@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Sofía', 'González', 'https://i.pravatar.cc/150?img=7', 'Perú', TRUE),
-('FireFox99', 'firefox@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Miguel', 'Sánchez', 'https://i.pravatar.cc/150?img=8', 'Uruguay', TRUE),
-('NightHawk', 'nighthawk@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Carmen', 'Ramírez', 'https://i.pravatar.cc/150?img=9', 'Venezuela', TRUE),
-('SilverBullet', 'silver@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Pedro', 'Torres', 'https://i.pravatar.cc/150?img=10', 'Ecuador', TRUE),
-('GoldenEagle', 'golden@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Isabel', 'Flores', 'https://i.pravatar.cc/150?img=11', 'Bolivia', TRUE),
-('CrimsonWolf', 'crimson@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Roberto', 'Castro', 'https://i.pravatar.cc/150?img=12', 'Paraguay', TRUE),
-('VenomStrike', 'venom@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Elena', 'Morales', 'https://i.pravatar.cc/150?img=13', 'España', TRUE),
-('BladeRunner', 'blade@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Javier', 'Ruiz', 'https://i.pravatar.cc/150?img=14', 'México', TRUE),
-('StarGazer', 'stargazer@arena.com', '$2b$10$rKZhZ3Z8Z8Z8Z8Z8Z8Z8ZeqK5k5k5k5k5k5k5k5k5k5k5k5k5k5k5k', 'Valentina', 'Ortiz', 'https://i.pravatar.cc/150?img=15', 'Argentina', TRUE);
+('NightHunter_89', 'carlos.mendoza@gmail.com', '$2y$10$examplehash1a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6', 'Carlos', 'Mendoza', 'https://steamcdn.com/avatars/nighthunter.jpg', 'México', TRUE),
+('ProGamer_arg', 'julian.diaz@hotmail.com', '$2y$10$examplehash2b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7', 'Julián', 'Díaz', 'https://steamcdn.com/avatars/progamer.jpg', 'Argentina', TRUE),
+('ShadowStrike', 'laura.fernandez@yahoo.com', '$2y$10$examplehash3c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8', 'Laura', 'Fernández', 'https://steamcdn.com/avatars/shadow.jpg', 'España', TRUE),
+('GhostRider_777', 'miguel.torres@gmail.com', '$2y$10$examplehash4d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9', 'Miguel', 'Torres', 'https://steamcdn.com/avatars/ghostrider.jpg', 'Chile', TRUE),
+('Fenix_Pro', 'sofia.ramirez@outlook.com', '$2y$10$examplehash5e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0', 'Sofía', 'Ramírez', 'https://steamcdn.com/avatars/fenix.jpg', 'Colombia', TRUE),
+('DarkMatter', 'andres.gomez@gmail.com', '$2y$10$examplehash6f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1', 'Andrés', 'Gómez', 'https://steamcdn.com/avatars/darkmatter.jpg', 'Perú', TRUE),
+('CyberKnight', 'valentina.lopez@hotmail.com', '$2y$10$examplehash7g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2', 'Valentina', 'López', 'https://steamcdn.com/avatars/cyberknight.jpg', 'Argentina', TRUE),
+('SteelWolf', 'pablo.martinez@gmail.com', '$2y$10$examplehash8h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3', 'Pablo', 'Martínez', 'https://steamcdn.com/avatars/steelwolf.jpg', 'Uruguay', TRUE),
+('CrimsonEagle', 'camilo.sanchez@yahoo.com', '$2y$10$examplehash9i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4', 'Camilo', 'Sánchez', 'https://steamcdn.com/avatars/crimson.jpg', 'Ecuador', TRUE),
+('QueenSlayer', 'paula.rodriguez@gmail.com', '$2y$10$examplehash10j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5', 'Paula', 'Rodríguez', 'https://steamcdn.com/avatars/queenslayer.jpg', 'Bolivia', TRUE),
+('LagMaster_2000', 'roberto.flores@hotmail.com', '$2y$10$examplehash11k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6', 'Roberto', 'Flores', 'https://steamcdn.com/avatars/lagmaster.jpg', 'Paraguay', TRUE),
+('NoobSlayer99', 'andrea.castro@gmail.com', '$2y$10$examplehash12l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7', 'Andrea', 'Castro', 'https://steamcdn.com/avatars/noobslayer.jpg', 'Costa Rica', TRUE),
+('ToxicPlayer', 'jorge.herrera@outlook.com', '$2y$10$examplehash13m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8', 'Jorge', 'Herrera', 'https://steamcdn.com/avatars/toxic.jpg', 'Panamá', FALSE),
+('SilentAssassin', 'carolina.morales@gmail.com', '$2y$10$examplehash14n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9', 'Carolina', 'Morales', 'https://steamcdn.com/avatars/silent.jpg', 'Nicaragua', TRUE),
+('Dragonborn_66', 'luis.velez@hotmail.com', '$2y$10$examplehash15o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0', 'Luis', 'Vélez', 'https://steamcdn.com/avatars/dragonborn.jpg', 'Honduras', TRUE);
 
 -- =====================================================
 -- 2. ESTADÍSTICAS DE JUGADORES
 -- =====================================================
+
 INSERT INTO estadisticas_jugador (usuario_id, torneos_jugados, torneos_ganados, partidas_jugadas, partidas_ganadas, puntos_totales, nivel, ranking_global) VALUES
-(1, 25, 8, 120, 75, 15000, 15, 1),
-(2, 22, 6, 105, 68, 13500, 14, 2),
-(3, 28, 10, 140, 92, 18000, 18, 3),
-(4, 18, 4, 85, 52, 10500, 12, 4),
-(5, 30, 12, 150, 98, 20000, 20, 5),
-(6, 15, 3, 70, 45, 9000, 11, 6),
-(7, 20, 5, 95, 60, 12000, 13, 7),
-(8, 12, 2, 60, 38, 7500, 10, 8),
-(9, 17, 4, 80, 50, 10000, 12, 9),
-(10, 14, 3, 65, 40, 8000, 10, 10),
-(11, 10, 1, 50, 28, 6000, 9, 11),
-(12, 8, 1, 40, 22, 5000, 8, 12),
-(13, 16, 3, 75, 48, 9500, 11, 13),
-(14, 19, 5, 90, 58, 11500, 13, 14),
-(15, 13, 2, 62, 39, 7800, 10, 15);
+(1, 45, 12, 340, 210, 12500, 42, 15),
+(2, 38, 9, 298, 185, 10800, 38, 23),
+(3, 52, 15, 410, 278, 15200, 48, 8),
+(4, 29, 5, 230, 140, 8500, 32, 42),
+(5, 41, 10, 325, 195, 11800, 40, 19),
+(6, 33, 7, 270, 160, 9500, 34, 31),
+(7, 47, 13, 380, 240, 13800, 45, 11),
+(8, 25, 4, 210, 125, 7200, 28, 56),
+(9, 36, 8, 290, 170, 10200, 36, 27),
+(10, 22, 3, 190, 110, 6100, 24, 68),
+(11, 18, 1, 160, 85, 4800, 18, 89),
+(12, 31, 6, 260, 145, 8900, 33, 38),
+(13, 12, 0, 110, 55, 3200, 12, 120),
+(14, 27, 4, 240, 130, 7800, 30, 47),
+(15, 20, 2, 180, 100, 5500, 20, 75);
 
 -- =====================================================
--- 3. BILLETERAS
+-- 3. CATEGORÍAS DE JUEGOS (Basadas en Steam)
 -- =====================================================
+
+INSERT INTO categorias (nombre, descripcion, icono_url, activa) VALUES
+('MOBA', 'Multiplayer Online Battle Arena - Juegos estratégicos por equipos', 'https://steamcdn.com/icons/moba.png', TRUE),
+('FPS', 'First Person Shooter - Acción en primera persona', 'https://steamcdn.com/icons/fps.png', TRUE),
+('Battle Royale', 'Juegos de supervivencia donde el último en pie gana', 'https://steamcdn.com/icons/battleroyale.png', TRUE),
+('RPG', 'Role Playing Games - Juegos de rol con historias profundas', 'https://steamcdn.com/icons/rpg.png', TRUE),
+('Estrategia', 'Juegos tácticos y de planificación', 'https://steamcdn.com/icons/estrategia.png', TRUE),
+('Racing', 'Juegos de carreras y vehículos', 'https://steamcdn.com/icons/racing.png', TRUE),
+('Lucha', 'Juegos de combates uno contra uno', 'https://steamcdn.com/icons/lucha.png', TRUE),
+('Terror', 'Juegos de horror y suspenso', 'https://steamcdn.com/icons/terror.png', TRUE);
+
+-- =====================================================
+-- 4. JUEGOS POPULARES DE STEAM
+-- =====================================================
+
+INSERT INTO juegos (nombre, descripcion, categoria_id, imagen_url, desarrollador, max_jugadores_equipo, activo, destacado) VALUES
+('DOTA 2', 'El MOBA más competitivo del mundo con millones de jugadores', 2, 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/570/capsule_616x353.jpg?t=1769535998', 'Valve Corporation', 5, TRUE, TRUE),
+('Counter-Strike 2', 'El clásico FPS renovado con gráficos actualizados', 1, 'https://upload.wikimedia.org/wikipedia/en/f/f2/CS2_Cover_Art.jpg', 'Valve Corporation', 5, TRUE, TRUE),
+('Apex Legends', 'Battle Royale rápido y dinámico con héroes únicos', 3, 'https://cdn1.epicgames.com/spt-assets/5dcd88f4e2094a698ebffa43438edc33/apex-legends-1f4hz.jpg', 'Respawn Entertainment', 3, TRUE, TRUE),
+('Team Fortress 2', 'FPS clásico con clases únicas', 1, 'https://upload.wikimedia.org/wikipedia/en/5/5f/Tf2_standalonebox.jpg', 'Valve Corporation', 9, TRUE, TRUE),
+('PUBG: Battlegrounds', 'El Battle Royale que inició todo', 3, 'https://assets.goal.com/images/v3/blte89d6cd19b80b0a8/8d9c326c1ca413195b04107a072c6e81a27962e0.jpg?auto=webp&format=pjpg&width=3840&quality=60', 'KRAFTON', 4, TRUE, FALSE),
+('Tom Clancy''s Rainbow Six Siege', 'FPS táctico centrado en destrucción y trabajo en equipo', 1, 'https://store.ubisoft.com/on/demandware.static/-/Sites-masterCatalog/default/dwf3ffc0d6/images/large/67c1bc71f98b730ad03b5d48.jpg', 'Ubisoft Montreal', 5, TRUE, TRUE),
+('Phasmophobia', 'Juego de terror cooperativo de fantasmas', 8, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkYZjmNZLKIsbwF4Je9T3QjhT9ictwH5Rd5w&s', 'Kinetic Games', 4, TRUE, FALSE),
+('Rematch', 'Fútbol arcade 5v5 de ritmo rápido, ideal para partidas casuales y competitivas', 4, 'https://store-images.s-microsoft.com/image/apps.51500.14036668029170653.97838000-87b6-4a56-9c79-e4eddcea3b6f.af638a10-8481-45d3-9a46-0be4a02a01d5', 'Sloclap', 5, TRUE, TRUE);
+
+-- =====================================================
+-- 5. BILLETERAS PARA USUARIOS (Saldo en ArenaCoins)
+-- =====================================================
+
 INSERT INTO billetera (usuario_id, saldo) VALUES
-(1, 5000.00),
-(2, 4500.00),
-(3, 6000.00),
-(4, 3500.00),
-(5, 7500.00),
-(6, 3000.00),
-(7, 4000.00),
-(8, 2500.00),
-(9, 3800.00),
-(10, 3200.00),
-(11, 2800.00),
-(12, 2200.00),
-(13, 3600.00),
-(14, 4200.00),
-(15, 3100.00);
+(1, 2500.50),
+(2, 1850.00),
+(3, 5200.75),
+(4, 950.25),
+(5, 2100.00),
+(6, 680.50),
+(7, 3800.00),
+(8, 450.00),
+(9, 1200.30),
+(10, 320.00),
+(11, 150.00),
+(12, 890.00),
+(13, 45.50),
+(14, 750.00),
+(15, 600.00);
 
 -- =====================================================
--- 4. TORNEOS
+-- 6. TORNEOS (Basados en juegos de Steam)
 -- =====================================================
-INSERT INTO torneos (nombre, descripcion, juego_id, organizador_id, tipo, estado, max_participantes, participantes_actuales, precio_inscripcion, premio_total, fecha_inicio, reglas) VALUES
--- Torneos Abiertos (En inscripción)
-('Copa League of Legends 2025', 'Torneo profesional de LoL con premios increíbles', 1, 1, 'publico', 'abierto', 32, 18, 50.00, 5000.00, '2025-03-15 18:00:00', 'Prohibido uso de hacks. Fair play obligatorio.'),
-('Valorant Masters Spring', 'Competencia táctica de alto nivel', 2, 2, 'publico', 'abierto', 16, 12, 75.00, 8000.00, '2025-03-20 19:00:00', 'Equipos de 5 jugadores. Comunicación obligatoria.'),
-('CS2 Global Championship', 'El mejor torneo de Counter-Strike', 3, 3, 'privado', 'abierto', 24, 8, 100.00, 12000.00, '2025-03-25 20:00:00', 'Sin cheats. Grabación de partidas requerida.'),
 
--- Torneos En Progreso
-('Fortnite Battle Royale Pro', 'Supervivencia extrema', 4, 4, 'publico', 'en_progreso', 100, 100, 25.00, 3000.00, '2025-02-08 17:00:00', 'Solo modo arena. Sin teamers.'),
-('FIFA 24 Weekend League', 'Torneo de fin de semana', 5, 5, 'publico', 'en_progreso', 64, 64, 30.00, 2500.00, '2025-02-09 14:00:00', 'Ultimate Team permitido. Sin pause abuse.'),
-
--- Torneos Finalizados
-('League Legends Winter Cup', 'Copa de invierno completada', 1, 1, 'publico', 'finalizado', 32, 32, 40.00, 4000.00, '2025-01-15 18:00:00', 'Torneo completado exitosamente'),
-('Valorant Invitational', 'Torneo por invitación', 2, 2, 'privado', 'finalizado', 8, 8, 150.00, 10000.00, '2025-01-20 20:00:00', 'Solo jugadores invitados'),
-
--- Torneos Gratuitos
-('Free League Tournament', 'Torneo gratuito para principiantes', 1, 3, 'publico', 'abierto', 64, 35, 0.00, 1000.00, '2025-03-18 16:00:00', 'Abierto a todos. Premio simbólico.'),
-('Valorant Newbie Cup', 'Copa para nuevos jugadores', 2, 4, 'publico', 'abierto', 32, 20, 0.00, 500.00, '2025-03-22 17:00:00', 'Nivel máximo permitido: 10');
+INSERT INTO torneos
+(nombre, descripcion, juego_id, organizador_id, tipo, estado, max_participantes, participantes_actuales, precio_inscripcion, premio_total, fecha_inicio, fecha_fin, reglas) VALUES
+(
+    'Steam DOTA 2 Open Cup',
+    'Torneo abierto de DOTA 2 con equipos de 5 jugadores',
+    1,
+    1,
+    'publico',
+    'abierto',
+    16,
+    8,
+    5.00,
+    400.00,
+    '2026-06-20 18:00:00',
+    '2026-06-21 23:00:00',
+    'Formato por equipos. Eliminación directa. Partidas BO1 hasta semifinales y BO3 en final.'
+),
+(
+    'CS2 Competitive Masters',
+    'Competición de Counter-Strike 2 enfocada en precisión y juego en equipo',
+    2,
+    2,
+    'privado',
+    'en_progreso',
+    8,
+    8,
+    10.00,
+    750.00,
+    '2026-05-08 19:00:00',
+    '2026-05-15 23:00:00',
+    'Bracket eliminatorio. BO3 en todas las rondas. Reglas competitivas estándar.'
+),
+(
+    'Apex Legends Showdown',
+    'Torneo de Apex Legends por escuadras de 3 jugadores',
+    3,
+    3,
+    'publico',
+    'abierto',
+    20,
+    12,
+    8.00,
+    500.00,
+    '2026-06-25 20:00:00',
+    '2026-06-25 23:59:00',
+    'Sistema de puntos por posición y kills. Se disputan 5 rondas.'
+),
+(
+    'Rainbow Six Siege Clash',
+    'Torneo táctico de Rainbow Six Siege centrado en estrategia y coordinación',
+    1,
+    4,
+    'privado',
+    'finalizado',
+    8,
+    8,
+    12.00,
+    600.00,
+    '2026-04-18 17:00:00',
+    '2026-04-18 22:00:00',
+    'Eliminación directa. Partidas BO3. Map pool oficial competitivo.'
+),
+(
+    'Phasmophobia Night Event',
+    'Evento cooperativo de terror para equipos de 4 jugadores',
+    8,
+    5,
+    'publico',
+    'cancelado',
+    12,
+    4,
+    4.00,
+    150.00,
+    '2026-07-01 21:00:00',
+    '2026-07-01 23:30:00',
+    'Se puntúa por objetivos cumplidos, dificultad y tiempo de supervivencia.'
+),
+(
+    'Rematch Cup',
+    'Torneo arcade de fútbol 5v5 para jugadores casuales y competitivos',
+    4,
+    6,
+    'publico',
+    'abierto',
+    16,
+    6,
+    6.00,
+    250.00,
+    '2026-06-28 18:30:00',
+    '2026-06-28 22:00:00',
+    'Partidas rápidas. Clasificación por victorias y goles a favor.'
+);
 
 -- =====================================================
--- 5. INSCRIPCIONES A TORNEOS (CORREGIDO)
+-- 7. INSCRIPCIONES A TORNEOS
 -- =====================================================
+
 INSERT INTO inscripciones (torneo_id, usuario_id, estado) VALUES
--- Torneo 1: Copa LoL (18 participantes)
-(1, 1, 'confirmada'), (1, 2, 'confirmada'), (1, 3, 'confirmada'), (1, 4, 'confirmada'),
-(1, 5, 'confirmada'), (1, 6, 'confirmada'), (1, 7, 'confirmada'), (1, 8, 'confirmada'),
-(1, 9, 'confirmada'), (1, 10, 'confirmada'), (1, 11, 'pendiente'), (1, 12, 'pendiente'),
-(1, 13, 'confirmada'), (1, 14, 'confirmada'), (1, 15, 'confirmada'), (1, 1, 'confirmada'),
-(1, 2, 'confirmada'), (1, 3, 'confirmada'),
+(1, 1, 'confirmada'),
+(1, 2, 'confirmada'),
+(1, 3, 'confirmada'),
+(1, 4, 'confirmada'),
+(1, 5, 'pendiente'),
+(1, 6, 'pendiente'),
+(1, 7, 'confirmada'),
+(1, 8, 'confirmada'),
 
--- Torneo 2: Valorant Masters (12 participantes)
-(2, 1, 'confirmada'), (2, 3, 'confirmada'), (2, 5, 'confirmada'), (2, 7, 'confirmada'),
-(2, 9, 'confirmada'), (2, 11, 'confirmada'), (2, 13, 'confirmada'), (2, 15, 'confirmada'),
-(2, 2, 'pendiente'), (2, 4, 'pendiente'), (2, 6, 'confirmada'), (2, 8, 'confirmada'),
+(2, 1, 'confirmada'),
+(2, 2, 'confirmada'),
+(2, 3, 'confirmada'),
+(2, 4, 'confirmada'),
+(2, 5, 'confirmada'),
+(2, 6, 'confirmada'),
+(2, 7, 'confirmada'),
+(2, 8, 'confirmada'),
 
--- Torneo 3: CS2 Championship (8 participantes)
-(3, 1, 'confirmada'), (3, 3, 'confirmada'), (3, 5, 'confirmada'), (3, 7, 'confirmada'),
-(3, 9, 'confirmada'), (3, 11, 'confirmada'), (3, 13, 'pendiente'), (3, 15, 'pendiente'),
+(3, 1, 'confirmada'),
+(3, 2, 'confirmada'),
+(3, 3, 'confirmada'),
+(3, 4, 'confirmada'),
+(3, 5, 'confirmada'),
+(3, 6, 'pendiente'),
+(3, 7, 'confirmada'),
+(3, 8, 'confirmada'),
 
--- Torneo 4: Fortnite (en progreso - 10 participantes mostrados)
-(4, 1, 'confirmada'), (4, 2, 'confirmada'), (4, 3, 'confirmada'), (4, 4, 'confirmada'),
-(4, 5, 'confirmada'), (4, 6, 'confirmada'), (4, 7, 'confirmada'), (4, 8, 'confirmada'),
-(4, 9, 'confirmada'), (4, 10, 'confirmada'),
+(4, 1, 'confirmada'),
+(4, 2, 'confirmada'),
+(4, 3, 'confirmada'),
+(4, 4, 'confirmada'),
+(4, 5, 'confirmada'),
+(4, 6, 'confirmada'),
+(4, 7, 'confirmada'),
+(4, 8, 'confirmada'),
 
--- Torneo 5: FIFA Weekend League (10 participantes)
-(5, 1, 'confirmada'), (5, 2, 'confirmada'), (5, 3, 'confirmada'), (5, 4, 'confirmada'),
-(5, 5, 'confirmada'), (5, 9, 'confirmada'), (5, 10, 'confirmada'), (5, 11, 'confirmada'),
-(5, 12, 'confirmada'), (5, 13, 'confirmada'),
+(5, 1, 'pendiente'),
+(5, 2, 'pendiente'),
+(5, 3, 'cancelada'),
+(5, 4, 'pendiente'),
 
--- Torneo 8: Free League (35 participantes)
-(8, 1, 'confirmada'), (8, 2, 'confirmada'), (8, 3, 'confirmada'), (8, 4, 'confirmada'),
-(8, 5, 'confirmada'), (8, 6, 'confirmada'), (8, 7, 'confirmada'), (8, 8, 'confirmada'),
-(8, 9, 'confirmada'), (8, 10, 'confirmada'), (8, 11, 'confirmada'), (8, 12, 'confirmada'),
-(8, 13, 'confirmada'), (8, 14, 'confirmada'), (8, 15, 'confirmada');
-
--- =====================================================
--- 6. PARTIDAS
--- =====================================================
-INSERT INTO partidas (torneo_id, ronda, jugador1_id, jugador2_id, ganador_id, puntaje_j1, puntaje_j2, estado, fecha_partida) VALUES
--- Torneo 6 (Finalizado) - Ronda 1
-(6, 1, 1, 2, 1, 16, 12, 'finalizada', '2025-01-15 18:30:00'),
-(6, 1, 3, 4, 3, 18, 10, 'finalizada', '2025-01-15 18:35:00'),
-(6, 1, 5, 6, 5, 20, 8, 'finalizada', '2025-01-15 18:40:00'),
-(6, 1, 7, 8, 7, 15, 13, 'finalizada', '2025-01-15 18:45:00'),
-
--- Torneo 6 - Semifinales
-(6, 2, 1, 3, 3, 14, 16, 'finalizada', '2025-01-15 20:00:00'),
-(6, 2, 5, 7, 5, 18, 14, 'finalizada', '2025-01-15 20:05:00'),
-
--- Torneo 6 - Final
-(6, 3, 3, 5, 5, 15, 18, 'finalizada', '2025-01-15 21:30:00'),
-
--- Torneo 4 (En progreso) - Algunas partidas
-(4, 1, 1, 2, 1, 25, 18, 'finalizada', '2025-02-08 17:30:00'),
-(4, 1, 3, 4, 3, 30, 15, 'finalizada', '2025-02-08 17:35:00'),
-(4, 1, 5, 6, NULL, NULL, NULL, 'en_progreso', '2025-02-10 18:00:00'),
-(4, 1, 7, 8, NULL, NULL, NULL, 'pendiente', '2025-02-10 19:00:00'),
-
--- Torneo 5 (FIFA - En progreso)
-(5, 1, 1, 9, 1, 3, 1, 'finalizada', '2025-02-09 14:30:00'),
-(5, 1, 2, 10, 2, 4, 2, 'finalizada', '2025-02-09 14:45:00'),
-(5, 1, 3, 11, NULL, NULL, NULL, 'en_progreso', '2025-02-10 15:00:00'),
-(5, 1, 4, 12, NULL, NULL, NULL, 'pendiente', '2025-02-10 16:00:00');
+(6, 1, 'confirmada'),
+(6, 2, 'confirmada'),
+(6, 5, 'confirmada'),
+(6, 6, 'confirmada'),
+(6, 7, 'pendiente'),
+(6, 8, 'confirmada');
 
 -- =====================================================
--- VERIFICACIÓN DE DATOS
+-- 8. PARTIDAS DE TORNEOS
 -- =====================================================
-SELECT 'Usuarios insertados:' AS Info, COUNT(*) AS Total FROM usuarios;
-SELECT 'Estadísticas creadas:' AS Info, COUNT(*) AS Total FROM estadisticas_jugador;
-SELECT 'Billeteras creadas:' AS Info, COUNT(*) AS Total FROM billetera;
-SELECT 'Torneos creados:' AS Info, COUNT(*) AS Total FROM torneos;
-SELECT 'Inscripciones realizadas:' AS Info, COUNT(*) AS Total FROM inscripciones;
-SELECT 'Partidas registradas:' AS Info, COUNT(*) AS Total FROM partidas;
+
+INSERT INTO partidas
+(torneo_id, ronda, jugador1_id, jugador2_id, ganador_id, puntaje_j1, puntaje_j2, estado, fecha_partida) VALUES
+(2, 1, 1, 2, 1, 2, 0, 'finalizada', '2026-05-08 19:00:00'),
+(2, 1, 3, 4, 4, 1, 2, 'finalizada', '2026-05-08 20:00:00'),
+(2, 1, 5, 6, 5, 2, 1, 'finalizada', '2026-05-09 19:00:00'),
+(2, 1, 7, 8, NULL, NULL, NULL, 'en_progreso', '2026-05-09 20:00:00'),
+
+(4, 1, 1, 2, 1, 2, 0, 'finalizada', '2026-04-18 17:00:00'),
+(4, 1, 3, 4, 3, 2, 1, 'finalizada', '2026-04-18 18:00:00'),
+(4, 1, 5, 6, 6, 1, 2, 'finalizada', '2026-04-18 19:00:00'),
+(4, 1, 7, 8, 7, 2, 0, 'finalizada', '2026-04-18 20:00:00'),
+(4, 2, 1, 3, 1, 2, 1, 'finalizada', '2026-04-18 21:00:00'),
+(4, 2, 6, 7, 7, 0, 2, 'finalizada', '2026-04-18 21:45:00'),
+(4, 3, 1, 7, 1, 2, 1, 'finalizada', '2026-04-18 22:30:00'),
+
+(6, 1, 1, 2, NULL, NULL, NULL, 'pendiente', '2026-06-28 18:30:00'),
+(6, 1, 5, 6, NULL, NULL, NULL, 'pendiente', '2026-06-28 19:00:00'),
+(6, 1, 8, 1, NULL, NULL, NULL, 'pendiente', '2026-06-28 19:30:00');
+
+-- =====================================================
+-- DATOS ADICIONALES ÚTILES PARA PRUEBAS
+-- =====================================================
+
+-- Vista de resumen de torneos activos
+SELECT 'Inserción completada exitosamente!' AS Status;
+SELECT COUNT(*) AS Total_Usuarios FROM usuarios;
+SELECT COUNT(*) AS Total_Juegos FROM juegos;
+SELECT COUNT(*) AS Total_Torneos FROM torneos;
+SELECT COUNT(*) AS Total_Inscripciones FROM inscripciones;
+SELECT COUNT(*) AS Total_Partidas FROM partidas;
+
+-- Consulta de ejemplo: Top 5 jugadores por ranking
+SELECT u.username, e.nivel, e.ranking_global, e.torneos_ganados 
+FROM usuarios u 
+JOIN estadisticas_jugador e ON u.id = e.usuario_id 
+ORDER BY e.ranking_global ASC 
+LIMIT 5;
+
+-- Consulta de ejemplo: Torneos más populares (más inscripciones)
+SELECT t.nombre, COUNT(i.id) AS inscripciones, t.premio_total
+FROM torneos t
+LEFT JOIN inscripciones i ON t.id = i.torneo_id AND i.estado = 'confirmada'
+GROUP BY t.id
+ORDER BY inscripciones DESC
+LIMIT 5;
+
+select * from usuarios;
+

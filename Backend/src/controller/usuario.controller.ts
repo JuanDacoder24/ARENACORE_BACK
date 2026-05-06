@@ -125,13 +125,12 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    console.log('BODY RECIBIDO:', req.body);  // <-- añade esto
-    const { usernameOrEmail, password } = req.body;
+    console.log('BODY RECIBIDO:', req.body);  
+    const { email, password } = req.body;
 
-    // Buscar usuario por email o username
-    let user = await Usuario.findByEmail(usernameOrEmail);
+    let user = await Usuario.findByEmail(email);
     if (!user) {
-      user = await Usuario.findByUsername(usernameOrEmail);
+      user = await Usuario.findByUsername(email);
     }
 
     if (!user) {
