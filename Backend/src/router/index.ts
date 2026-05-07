@@ -10,12 +10,12 @@ import estadisticasRoutes from "./estadisticas.routes";
 
 const router = Router();
 
-router.use("/api", usuariosRoutes);
-router.use("/api", torneosRoutes);
-router.use("/api", inscripcionesRoutes);
-router.use("/api", partidasRoutes);
-router.use("/api", juegosRoutes);
-router.use("/api", categoriasRoutes);
-router.use("/api", estadisticasRoutes);
+router.use('/', usuariosRoutes);
+router.use('/', torneosRoutes);
+router.use('/', inscripcionesRoutes);
+router.use('/', partidasRoutes);
+router.use('/', juegosRoutes);
+router.use('/', categoriasRoutes);
+router.use('/', estadisticasRoutes);
 
 export default router;
