@@ -16,6 +16,6 @@ router.use('/', inscripcionesRoutes);
 router.use('/', partidasRoutes);
 router.use('/', juegosRoutes);
 router.use('/', categoriasRoutes);
-router.use('/', estadisticasRoutes);
+router.use('/estadisticas', estadisticasRoutes);
 
 export default router;

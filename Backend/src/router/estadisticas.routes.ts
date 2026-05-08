@@ -3,7 +3,7 @@ import * as EstadisticasController from '../controller/estadisticas.controller'
 
 const router = Router()
 
-router.get('/estadisticas/ranking', EstadisticasController.rankingTorneo)
-router.get('/estadisticas/stats', EstadisticasController.statsJugador)
+router.get('/ranking', EstadisticasController.rankingTorneo)
+router.get('/stats', EstadisticasController.statsJugador)
 
 export default router

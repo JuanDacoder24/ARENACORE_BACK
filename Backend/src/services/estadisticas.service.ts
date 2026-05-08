@@ -1,4 +1,4 @@
-import EstadisticasJugador from "../model/estadisticas-jugador";
+import EstadisticasJugador from "../model/estadisticasJugador";
 
 export class EstadisticasService {
 
