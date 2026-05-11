@@ -9,9 +9,11 @@ router.post('/torneos', TorneosController.post)
 router.put('/torneos/:id', TorneosController.put)
 router.delete('/torneos/:id', TorneosController.remove)
 
-// Acciones extra
 router.post('/torneos/:id/publicar', TorneosController.publicar)
 router.post('/torneos/:id/cancelar', TorneosController.cancelar)
 router.post('/torneos/:id/inscribir', TorneosController.inscribir)
+
+router.get('/:id/participantes', TorneosController.obtenerParticipantes)
+router.post('/:id/finalizar', TorneosController.finalizarTorneo)
 
 export default router
