@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import sequelize from './config/database';
 import authRoutes from './router/auth.routes';
 import mainRouter from './router/index';
+import { EstadisticasJugador, Inscripcion, Usuario } from './model';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -147,5 +148,9 @@ process.on('SIGTERM', async () => {
   console.log('Conexión cerrada');
   process.exit(0);
 });
+
+// Asociación necesaria para que el include funcione
+Inscripcion.belongsTo(Usuario, { foreignKey: 'usuario_id' });
+Usuario.hasMany(Inscripcion, { foreignKey: 'usuario_id' });
 
 export default app;

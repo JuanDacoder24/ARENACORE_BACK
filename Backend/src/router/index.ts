@@ -18,4 +18,6 @@ router.use('/', juegosRoutes);
 router.use('/', categoriasRoutes);
 router.use('/estadisticas', estadisticasRoutes);
 
+
+
 export default router;

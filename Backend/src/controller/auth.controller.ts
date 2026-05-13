@@ -30,13 +30,11 @@ export const register = async (req: Request, res: Response) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
-
     const user = await Usuario.create({
       username,
       nombre: name,
       email,
-      password_hash: hashedPassword,
+      password_hash: password,
     });
 
     const token = createToken(user, false);

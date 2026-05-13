@@ -33,12 +33,12 @@ EstadisticasJugador.init(
   {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     usuario_id: { type: DataTypes.INTEGER, allowNull: false },
-    torneos_jugados: { type: DataTypes.INTEGER, defaultValue: 0 },
-    torneos_ganados: { type: DataTypes.INTEGER, defaultValue: 0 },
-    partidas_jugadas: { type: DataTypes.INTEGER, defaultValue: 0 },
-    partidas_ganadas: { type: DataTypes.INTEGER, defaultValue: 0 },
-    puntos_totales: { type: DataTypes.INTEGER, defaultValue: 0 },
-    nivel: { type: DataTypes.INTEGER, defaultValue: 1 },
+    torneos_jugados: { type: DataTypes.INTEGER, defaultValue: 100 },
+    torneos_ganados: { type: DataTypes.INTEGER, defaultValue: 180 },
+    partidas_jugadas: { type: DataTypes.INTEGER, defaultValue: 500 },
+    partidas_ganadas: { type: DataTypes.INTEGER, defaultValue: 290 },
+    puntos_totales: { type: DataTypes.INTEGER, defaultValue: 1500 },
+    nivel: { type: DataTypes.INTEGER, defaultValue: 15 },
     ranking_global: { type: DataTypes.INTEGER, allowNull: true },
     updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
   },
