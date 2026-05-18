@@ -73,9 +73,9 @@ export const inscribir = async (req: Request, res: Response) => {
     const torneo = await Torneo.findByPk(torneo_id)
     if (!torneo) return res.status(404).json({ message: "Torneo no encontrado" })
 
-    if (torneo.estado !== 'abierto') {
-      return res.status(400).json({ message: "El torneo no está abierto para inscripciones" })
-    }
+    if (!['abierto', 'en_progreso'].includes(torneo.estado?.toString() || '')) {
+  return res.status(400).json({ message: "El torneo no está abierto para inscripciones" })
+}
 
     const participantes = torneo.participantes_actuales ?? 0
 
@@ -100,13 +100,11 @@ export const inscribir = async (req: Request, res: Response) => {
   export const obtenerParticipantes = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        // Buscamos en la tabla inscripciones incluyendo el modelo Usuario
         const inscripciones = await Inscripcion.findAll({
             where: { torneo_id: id },
             include: [{ model: Usuario }]
         });
         
-        // Extraemos solo los datos de los usuarios
         const participantes = inscripciones.map((ins: any) => ins.Usuario);
         return res.status(200).json(participantes);
     } catch (error) {

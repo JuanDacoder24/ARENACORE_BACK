@@ -12,13 +12,13 @@ export const statsJugador = async (req: Request, res: Response) => {
     if (!stats) {
       stats = await EstadisticasJugador.create({
         usuario_id: Number(userId),
-        torneos_jugados: 0,
-        torneos_ganados: 0,
-        partidas_jugadas: 0,
-        partidas_ganadas: 0,
-        puntos_totales: 0,
-        nivel: 1,
-        ranking_global: null
+        torneos_jugados: 10,      
+        torneos_ganados: 3,
+        partidas_jugadas: 50,
+        partidas_ganadas: 28,
+        puntos_totales: 1500,
+        nivel: 5,
+        ranking_global: 2000,
       });
     }
 

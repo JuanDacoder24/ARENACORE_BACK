@@ -1,5 +1,6 @@
-import Usuario from "../model/usuario";
-import { createToken } from "../login/JWTLogin";
+import Usuario from "../model/usuario"
+import { createToken } from "../login/JWTLogin"
+import { EstadisticasJugador } from "../model";
 
 export class UsuarioService {
   // ============ CRUD BÁSICO ============
@@ -55,20 +56,12 @@ export class UsuarioService {
 
     const existingEmail = await Usuario.findByEmail(email);
     if (existingEmail) {
-      return {
-        error: true,
-        status: 400,
-        message: "El email ya está registrado",
-      };
+      return { error: true, status: 400, message: "El email ya está registrado" };
     }
 
     const existingUsername = await Usuario.findByUsername(username);
     if (existingUsername) {
-      return {
-        error: true,
-        status: 400,
-        message: "El username ya está en uso",
-      };
+      return { error: true, status: 400, message: "El username ya está en uso" };
     }
 
     try {
@@ -80,6 +73,20 @@ export class UsuarioService {
         apellido,
         pais,
       });
+      console.log("Usuario creado:", newUser);
+
+      await EstadisticasJugador.create({
+        usuario_id: newUser.id,
+        torneos_jugados: 10,      
+        torneos_ganados: 3,
+        partidas_jugadas: 50,
+        partidas_ganadas: 28,
+        puntos_totales: 1500,
+        nivel: 5,
+        ranking_global: 2000,
+      });
+      console.log("Estadísticas del jugador creadas:", newUser.id);
+
 
       const token = createToken(newUser, false);
 
@@ -100,11 +107,7 @@ export class UsuarioService {
       };
     } catch (error: any) {
       if (error.name === "SequelizeUniqueConstraintError") {
-        return {
-          error: true,
-          status: 400,
-          message: "El email o username ya están registrados",
-        };
+        return { error: true, status: 400, message: "El email o username ya están registrados" };
       }
       throw error;
     }
