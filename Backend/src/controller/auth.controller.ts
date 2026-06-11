@@ -43,11 +43,11 @@ export const register = async (req: Request, res: Response) => {
       success: true,
       message: "Registro exitoso",
       data: {
-        user: { 
-          id: user.id, 
+        user: {
+          id: user.id,
           username: user.username,
-          nombre: user.nombre, 
-          email: user.email 
+          nombre: user.nombre,
+          email: user.email
         },
         token,
       },

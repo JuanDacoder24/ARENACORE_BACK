@@ -26,11 +26,11 @@ export const post = async (req: Request, res: Response) => {
   try {
     const creado = await Torneo.create(req.body)
     return res.status(201).json(creado)
-  } catch (error: any) { 
-    console.error("DETALLE DEL ERROR:", error); 
-    return res.status(400).json({ 
-      message: "Error creando torneo", 
-      details: error.message 
+  } catch (error: any) {
+    console.error("DETALLE DEL ERROR:", error);
+    return res.status(400).json({
+      message: "Error creando torneo",
+      details: error.message
     })
   }
 }
@@ -74,8 +74,8 @@ export const inscribir = async (req: Request, res: Response) => {
     if (!torneo) return res.status(404).json({ message: "Torneo no encontrado" })
 
     if (!['abierto', 'en_progreso'].includes(torneo.estado?.toString() || '')) {
-  return res.status(400).json({ message: "El torneo no está abierto para inscripciones" })
-}
+      return res.status(400).json({ message: "El torneo no está abierto para inscripciones" })
+    }
 
     const participantes = torneo.participantes_actuales ?? 0
 
@@ -97,56 +97,57 @@ export const inscribir = async (req: Request, res: Response) => {
   }
 }
 
-  export const obtenerParticipantes = async (req: Request, res: Response) => {
-    try {
-        const { id } = req.params;
-        const inscripciones = await Inscripcion.findAll({
-            where: { torneo_id: id },
-            include: [{ model: Usuario }]
-        });
-        
-        const participantes = inscripciones.map((ins: any) => ins.Usuario);
-        return res.status(200).json(participantes);
-    } catch (error) {
-        return res.status(500).json({ message: "Error al obtener participantes" });
-    }
+export const obtenerParticipantes = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const inscripciones = await Inscripcion.findAll({
+      where: { torneo_id: id },
+      include: [{ model: Usuario }]
+    });
+
+    const participantes = inscripciones.map((ins: any) => ins.Usuario);
+    return res.status(200).json(participantes);
+  } catch (error) {
+    return res.status(500).json({ message: "Error al obtener participantes" });
+  }
 }
 
 export const finalizarTorneo = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { ganador_id } = req.body;
+  const { id } = req.params;
+  const { ganador_id } = req.body;
 
-    const t = await sequelize.transaction();
+  const t = await sequelize.transaction();
 
-    try {
-        const torneo: any = await Torneo.findByPk(id, { transaction: t });
+  try {
+    const torneo: any = await Torneo.findByPk(id, { transaction: t });
 
-        if (!torneo || torneo.estado !== 'abierto') {
-            await t.rollback();
-            return res.status(400).json({ message: 'Torneo no válido para finalizar' });
-        }
-
-        await torneo.update({
-            estado: 'finalizado',
-            ganador_id: ganador_id
-        }, { transaction: t });
-
-        const billetera: any = await Billetera.findOne({ 
-            where: { usuario_id: ganador_id },
-            transaction: t 
-        });
-
-        if (billetera) {
-            const nuevoSaldo = Number(billetera.saldo) + Number(torneo.premio_total);
-            await billetera.update({ saldo: nuevoSaldo }, { transaction: t });
-        }
-
-        await t.commit();
-        return res.status(200).json({ message: 'Torneo finalizado y premio pagado con éxito' });
-
-    } catch (error) {
-        await t.rollback();
-        console.error('Error en la transacción:', error);
-        return res.status(500).json({ message: 'Error interno al procesar el cierre' });
+    // Cambia la condición para permitir múltiples estados válidos
+    if (!torneo || (torneo.estado !== 'abierto' && torneo.estado !== 'en_curso')) {
+      await t.rollback();
+      return res.status(400).json({ message: 'Torneo no válido para finalizar' });
     }
+
+    await torneo.update({
+      estado: 'finalizado',
+      ganador_id: ganador_id
+    }, { transaction: t });
+
+    const billetera: any = await Billetera.findOne({
+      where: { usuario_id: ganador_id },
+      transaction: t
+    });
+
+    if (billetera) {
+      const nuevoSaldo = Number(billetera.saldo) + Number(torneo.premio_total);
+      await billetera.update({ saldo: nuevoSaldo }, { transaction: t });
+    }
+
+    await t.commit();
+    return res.status(200).json({ message: 'Torneo finalizado y premio pagado con éxito' });
+
+  } catch (error) {
+    await t.rollback();
+    console.error('Error en la transacción:', error);
+    return res.status(500).json({ message: 'Error interno al procesar el cierre' });
+  }
 }
